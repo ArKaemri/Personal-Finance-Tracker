@@ -1,7 +1,6 @@
 # ------------------------- dependencies -------------------------
 import tkinter as tk
 from tkinter import ttk
-
 # ------------------------- app initialisation -------------------------
 # app instance
 window = tk.Tk(className='expense tracker')
@@ -9,11 +8,12 @@ window = tk.Tk(className='expense tracker')
 # size of tkinter window
 w = 800
 h = 800
-# common colors
+# common variables
 bg_common = '#626262'
 fg = 'white'
 bg_passive = '#7d7d7d'
-bg_active = "#999999"
+bg_active = '#999999'
+relief = 'solid'
 
 # get width/height of the screen
 screen_w = window.winfo_screenwidth()
@@ -85,75 +85,103 @@ def create_entry():
     # delete widgets on the screen
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text='New Entry', font=('System', 26))
+    header = tk.Label(main_frame, text='New Entry', font=('System', 28), background=bg_common, foreground=fg)
     header.pack(pady=20)
+    # spacer 
+    spacer1 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer1.pack()
     # acount choice, currently just UI element
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18))
-    acounts.pack(pady=50)
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label.pack(pady=5)
+    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts.pack()
     acounts.current(0) # default option, 1-st from the list
+    spacer2 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer2.pack()
     # amount input field
-    amount = tk.Entry(main_frame, selectbackground='white', selectforeground='black', font=('System', 18))
-    amount.pack(pady=50)
+    amount_label = tk.Label(main_frame, text='Input amount', background=bg_common, foreground=fg, font=('System', 18))
+    amount_label.pack(pady=5)
+    amount = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    amount.pack()
+    spacer3 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer3.pack()
     # source/desination input field
-    text = tk.Entry(main_frame, selectbackground='white', selectforeground='black', font=('System', 18))
-    text.pack(pady=50)
+    purpose_label = tk.Label(main_frame, text='Gain source / spent destination', background=bg_common, foreground=fg, font=('System', 18))
+    purpose_label.pack(pady=5)
+    text = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    text.pack()
+    spacer4 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, text='Save', activebackground='white', activeforeground='black', font=('System', 18))
+    button = tk.Button(main_frame, text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
-    
+
 # ------------------------- overview UI -------------------------
 def create_overview():
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text='Finance Overview', font=('System', 26))
+    header = tk.Label(main_frame, text='Finance Overview', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
+    spacer1 = tk.Frame(main_frame, height=180, background=bg_common)
+    spacer1.pack()
     # account choice
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18))
-    acounts.pack(pady=80)
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label.pack(pady=5)
+    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts.pack()
     acounts.current(0)
-    # spacer to position button
-    spacer = tk.Frame(main_frame, height=200)
-    spacer.pack()
+    spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
+    spacer2.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Show', activebackground='white', activeforeground='black', font=('System', 18))
+    button = tk.Button(main_frame, text='Show', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
 # ------------------------- history UI -------------------------
 def create_history():
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text='Finance History', font=('System', 26))
+    header = tk.Label(main_frame, text='Finance History', foreground=fg, background=bg_common, font=('System', 28))
     header.pack(pady=20)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer1.pack()
     # account choice
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18))
-    acounts.pack(pady=60)
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label.pack(pady=5)
+    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts.pack()
     acounts.current(0)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer2.pack()
     # date choice - currently just UI 
-    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18))
-    date.pack(pady=60)
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label.pack(pady=5)
+    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18), state='readonly')
+    date.pack()
     date.current(0)
-    # spacer to position button
-    spacer = tk.Frame(main_frame, height=100)
-    spacer.pack()
+    spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
+    spacer3.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Plot', activebackground='white', activeforeground='black', font=('System', 18))
+    button = tk.Button(main_frame, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
 # ------------------------- chart UI -------------------------
 def create_chart():
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text='Earning/Spending Chart', font=('System', 26))
+    header = tk.Label(main_frame, text='Earning/Spending Chart', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
+    spacer1 = tk.Frame(main_frame, height=180, background=bg_common)
+    spacer1.pack()
     # account choice
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18))
-    acounts.pack(pady=80)
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label.pack(pady=5)
+    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts.pack()
     acounts.current(0)
-    # spacer to position button
-    spacer = tk.Frame(main_frame, height=200)
-    spacer.pack()
+    spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
+    spacer2.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Plot', activebackground='white', activeforeground='black', font=('System', 18))
+    button = tk.Button(main_frame, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
 
 # ------------------------- export UI -------------------------
@@ -168,24 +196,40 @@ def create_export(file_type):
     
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text=text_choice, font=('System', 26))
-    header.pack(pady=30)
-    # file name input field
-    name = tk.Entry(main_frame, selectbackground='white', selectforeground='black', font=('System', 18))
-    name.pack(pady=30)
-    # file destination input field
-    destination = tk.Entry(main_frame, selectbackground='white', selectforeground='black', font=('System', 18))
-    destination.pack(pady=30)
+    header = tk.Label(main_frame, text=text_choice, background=bg_common, foreground=fg, font=('System', 28))
+    header.pack(pady=50)
     # acount choice, currently just UI element
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18))
-    acounts.pack(pady=30)
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label.pack(pady=5)
+    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts.pack()
     acounts.current(0)
+    spacer1 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer1.pack()
     # date choice - currently just UI 
-    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18))
-    date.pack(pady=30)
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label.pack(pady=5)
+    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18), state='readonly')
+    date.pack()
     date.current(0)
+    spacer2 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer2.pack()
+    # file name input field
+    name_label = tk.Label(main_frame, text='Name the file', background=bg_common, foreground=fg, font=('System', 18))
+    name_label.pack(pady=5)
+    name = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    name.pack()
+    spacer3 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer3.pack()
+    # file destination input field
+    destination_label = tk.Label(main_frame, text='Where to save file', background=bg_common, foreground=fg, font=('System', 18))
+    destination_label.pack(pady=5)
+    destination = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    destination.pack()
+    spacer4 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, text=button_choice, activebackground='white', activeforeground='black', font=('System', 18))
+    button = tk.Button(main_frame, text=button_choice, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
 
 # ------------------------- initiate the app -------------------------
