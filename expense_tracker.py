@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 # ------------------------- app initialisation -------------------------
 # app instance
-window = tk.Tk(className='expense tracker')
+window = tk.Tk(className='Expense tracker')
 
 # size of tkinter window
 w = 800
