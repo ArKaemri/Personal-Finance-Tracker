@@ -46,3 +46,4 @@ App to input and store money amount spent or earned to specific acount and desti
 - add color palete change (bright/dark + choose colors to not clash with colorblindness)
 - try to make src/dst less rigid (for example 'birthday gift' and 'birthday' should be counted as one, considering both are in 'gain' category)
 - add language changes (RU and LT)
+- add ability to add account 'class' (divides in acount selection into groups seperated by line and having class at start)
