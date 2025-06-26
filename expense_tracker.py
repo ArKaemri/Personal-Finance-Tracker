@@ -78,7 +78,64 @@ main_frame.pack(fill='both', expand='True')
 def reset_window():
     for widget in main_frame.winfo_children():
         widget.destroy()
+
+# ------------------------- load acounts (single) -------------------------
+# global var to display chosen acount on button that opens choice menu
+# define acount for visual (and later to write into file)
+selected_label = tk.StringVar()
+selected_label.set('Selecte Acount')
+# create new window with selections
+def load_acount_single(label_var):
+    # function to select item from listbox
+    def select_item(event):
+        # get the widget
+        listbox = event.widget
+        # get the selection
+        selected = listbox.curselection()
+        # if selecting empty space or similar, don't react
+        if not selected:
+            return
+        # retrieve selection values
+        index = selected[0]
+        selected_value = listbox.get(index)
+        # set global selected acount label (change button text to see what's selected and write to txt)
+        label_var.set(selected_value)
+        # close the popup
+        listbox.master.destroy()
         
+    top_w = 400
+    top_h = 400
+    # create and position window
+    toplevel = tk.Toplevel(main_frame)
+    top_sw = toplevel.winfo_screenwidth()
+    top_hw = toplevel.winfo_screenheight()
+    top_x = (top_sw / 2) - (top_w / 2)
+    top_y = (top_hw / 2) - (top_h / 2)
+    toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    # read data from txt and write to dictionary
+    acc_dict = {}
+    # read file line by line
+    with open('acounts.txt') as file:
+        for line in file:
+            # delete \n
+            line = line.strip()
+            # divide into account name and class (in file acc-class)
+            value, key = line.split('-')
+            # add all values with same key as a list to that key {'key':[a, b, c]}
+            acc_dict.setdefault(key, []).append(value)
+    # create listbox
+    # flatten all values into 1 list
+    all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
+    # convert to tuple and add as listbox variables
+    acount_var = tk.Variable(value=tuple(all_acounts))
+    # create listbox widget
+    listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.SINGLE)
+    listbox.pack()
+    # select an item from list
+    listbox.bind('<<ListboxSelect>>', select_item)
+    # prevent from opening more windows
+    toplevel.grab_set()
+
 # ------------------------- entry UI -------------------------
 # add entry window
 def create_entry():
@@ -93,9 +150,8 @@ def create_entry():
     # acount choice, currently just UI element
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts = tk.Button(main_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_common, foreground=fg)
     acounts.pack()
-    acounts.current(0) # default option, 1-st from the list
     spacer2 = tk.Frame(main_frame, height=80, background=bg_common)
     spacer2.pack()
     # amount input field
@@ -115,7 +171,7 @@ def create_entry():
     # activation button - save to txt file
     button = tk.Button(main_frame, text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
-
+    
 # ------------------------- overview UI -------------------------
 def create_overview():
     reset_window()
