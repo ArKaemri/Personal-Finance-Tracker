@@ -1,6 +1,7 @@
 # ------------------------- dependencies -------------------------
 import tkinter as tk
 from tkinter import ttk
+import datetime
 # ------------------------- app initialisation -------------------------
 # app instance
 window = tk.Tk(className='Expense tracker')
@@ -83,7 +84,7 @@ def reset_window():
 # global var to display chosen acount on button that opens choice menu
 # define acount for visual (and later to write into file)
 selected_label = tk.StringVar()
-selected_label.set('Selecte Acount')
+selected_label.set('Select Acount')
 # create new window with selections
 def load_acount_single(label_var):
     # function to select item from listbox
@@ -135,7 +136,38 @@ def load_acount_single(label_var):
     listbox.bind('<<ListboxSelect>>', select_item)
     # prevent from opening more windows
     toplevel.grab_set()
-
+    
+# ------------------------- save entry inputs -------------------------
+def save_entry(amount, text):
+    # get selected acount
+    acount = selected_label.get()
+    # get and lowercase text
+    text = text.get().lower()
+    # get the date of input
+    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    # get the direction (spent or gain money)
+    # get amount in text form without spaces
+    amount_text = amount.get().strip()
+    # add gain/spent variable depending on symbol +/-/nothing
+    if amount_text.startswith('-'):
+        state = 'spent'
+        amount_text = amount_text[1:].strip()
+    elif amount_text.startswith('+'):
+        state = 'gain'
+        amount_text = amount_text[1:].strip()
+    else:
+        state = 'gain'
+    # convert amount text to number (float)
+    amount_val = float(amount_text)
+    # write into file
+    output = f'{date}|{acount}|{state}|{amount_val:.2f}|{text}'
+    with open('finance_test.txt', 'a') as file:
+        file.write('\n' + output)
+    # reset window
+    selected_label.set('Select Acount')
+    reset_window()
+    create_entry()
+    
 # ------------------------- entry UI -------------------------
 # add entry window
 def create_entry():
@@ -169,7 +201,7 @@ def create_entry():
     spacer4 = tk.Frame(main_frame, height=80, background=bg_common)
     spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
 # ------------------------- overview UI -------------------------
