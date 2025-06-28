@@ -116,7 +116,7 @@ def load_acount_single(label_var):
     # read data from txt and write to dictionary
     acc_dict = {}
     # read file line by line
-    with open('acounts.txt') as file:
+    with open('acounts_test.txt') as file:
         for line in file:
             # delete \n
             line = line.strip()
@@ -168,6 +168,36 @@ def save_entry(amount, text):
     reset_window()
     create_entry()
     
+# ------------------------- add acount -------------------------
+def add_new_acount():
+    # create popup
+    toplevel = tk.Toplevel(main_frame)
+    top_w = 200
+    top_h = 200
+    top_sw = toplevel.winfo_screenwidth()
+    top_sh = toplevel.winfo_screenheight()
+    top_x = (top_sw / 2) - (top_w / 2)
+    top_y = (top_sh / 2) - (top_h / 2)
+    toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    # add entry
+    new_label = tk.Label(toplevel, text='Input new acount')
+    new_label.pack()
+    new_entry = tk.Entry(toplevel)
+    new_entry.pack(pady=20)
+    # entry function
+    def new_acount():
+        # get variable from entry
+        acount = new_entry.get()
+        # write to file
+        with open('acounts_test.txt', 'a') as file:
+            file.write('\n' + acount + '-live')
+        # close popup
+        toplevel.destroy()
+    # add confirm button
+    new_button = tk.Button(toplevel, text='Confirm', command=new_acount)
+    new_button.pack()
+    toplevel.grab_set()
+
 # ------------------------- entry UI -------------------------
 # add entry window
 def create_entry():
@@ -184,6 +214,8 @@ def create_entry():
     acounts_label.pack(pady=5)
     acounts = tk.Button(main_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_common, foreground=fg)
     acounts.pack()
+    add_acount = tk.Button(main_frame, text='+', command=add_new_acount, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg)
+    add_acount.pack()
     spacer2 = tk.Frame(main_frame, height=80, background=bg_common)
     spacer2.pack()
     # amount input field
