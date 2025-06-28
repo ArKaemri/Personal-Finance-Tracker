@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime
+import pandas
 # ------------------------- app initialisation -------------------------
 # app instance
 window = tk.Tk(className='Expense tracker')
@@ -236,24 +237,71 @@ def create_entry():
     button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
+# ------------------------- multi-choice acount select -------------------------
+selected_labels = tk.StringVar()
+selected_labels.set('Select Acounts')
+from tkinter.messagebox import showinfo
+def multi_choice_acount(label_var):
+    # create popup
+    toplevel = tk.Toplevel(main_frame)
+    top_w = 400
+    top_h = 400
+    top_sw = toplevel.winfo_screenwidth()
+    top_sh = toplevel.winfo_screenheight()
+    top_x = (top_sw / 2) - (top_w / 2)
+    top_y = (top_sh / 2) - (top_h / 2)
+    toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    # save selected acounts
+    def save_selection():
+        # gather selected acounts
+        selected = listbox.curselection()
+        if not selected:
+            return
+        selected_acounts = [listbox.get(i) for i in selected]
+        selected_list = ', '.join(selected_acounts)
+        selected_label = selected_list
+        # shorten visual representation if too long
+        label_var.set(selected_list if len(selected_acounts) <= 3 else ', '.join(selected_acounts[:2]) + '...')
+        # close window 
+        listbox.master.destroy()
+        print(selected_label)
+    # display selection
+    acc_dict = {}
+    with open('acounts_test.txt', 'r') as file:
+        for line in file:
+            line = line.strip()
+            value, key = line.split('-')
+            acc_dict.setdefault(key, []).append(value)
+    all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
+    acount_var = tk.Variable(value=tuple(all_acounts))
+    listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
+    listbox.pack()
+    button = tk.Button(toplevel, text='Confirm', command=save_selection)
+    button.pack()
+    toplevel.grab_set()
+# ------------------------- display pandas table -------------------------
+def display_table():
+    return
+
 # ------------------------- overview UI -------------------------
 def create_overview():
     reset_window()
+    selected_labels.set('Select Acounts')
+    selected_label.set('Select Acount')
     # label of the window
     header = tk.Label(main_frame, text='Finance Overview', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
     spacer1 = tk.Frame(main_frame, height=180, background=bg_common)
     spacer1.pack()
     # account choice
-    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acounts', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
     acounts.pack()
-    acounts.current(0)
     spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
     spacer2.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Show', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, text='Show', command=display_table, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
 # ------------------------- history UI -------------------------
@@ -354,6 +402,6 @@ def create_export(file_type):
 
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
-create_entry()
+create_overview()
 # run whole app
 window.mainloop()
