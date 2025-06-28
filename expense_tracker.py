@@ -37,38 +37,6 @@ def close_window(e):
 # pass Esc key as variable for function
 window.bind('<Escape>', lambda e: close_window(e))
 
-# ------------------------- create menu -------------------------
-# create main menu (whole top bar where all options reside)
-menu = tk.Menu(window)
-# set the menu
-window.config(menu=menu)
-
-# create submenu (seperate options that will have choices after clicked)
-file_menu = tk.Menu(menu)
-# name it and add to the main menu
-menu.add_cascade(label='Window', menu=file_menu)
-# add seperate choices
-file_menu.add_command(label='New')
-file_menu.add_command(label='Overview')
-file_menu.add_command(label='History')
-file_menu.add_command(label='Chart')
-
-# repeat with second submenu
-export_menu = tk.Menu(menu)
-menu.add_cascade(label='Export', menu=export_menu)
-export_menu.add_command(label='To CSV')
-export_menu.add_command(label='To xlsx')
-
-# repeat with third submenu
-help_menu = tk.Menu(menu)
-menu.add_cascade(label='Help', menu=help_menu)
-help_menu.add_command(label='Files')
-help_menu.add_command(label='New entry')
-help_menu.add_command(label='Overview')
-help_menu.add_command(label='History')
-help_menu.add_command(label='Chart')
-help_menu.add_command(label='Export')
-
 # ------------------------- main frame -------------------------
 # create empty frame where widgets will appear
 main_frame = tk.Frame(window, background=bg_common)
@@ -261,10 +229,9 @@ def multi_choice_acount(label_var):
         selected_list = ', '.join(selected_acounts)
         selected_label = selected_list
         # shorten visual representation if too long
-        label_var.set(selected_list if len(selected_acounts) <= 3 else ', '.join(selected_acounts[:2]) + '...')
+        label_var.set(selected_list if len(selected_acounts) <= 3 else ', '.join(selected_acounts[:3]) + '...')
         # close window 
         listbox.master.destroy()
-        print(selected_label)
     # display selection
     acc_dict = {}
     with open('acounts_test.txt', 'r') as file:
@@ -400,8 +367,42 @@ def create_export(file_type):
     button = tk.Button(main_frame, text=button_choice, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
 
+# ------------------------- create menu -------------------------
+# create main menu (whole top bar where all options reside)
+def create_menu():
+    menu = tk.Menu(window)
+    # set the menu
+    window.config(menu=menu)
+
+    # create submenu (seperate options that will have choices after clicked)
+    file_menu = tk.Menu(menu)
+    # name it and add to the main menu
+    menu.add_cascade(label='Window', menu=file_menu)
+    # add seperate choices
+    file_menu.add_command(label='New', command=create_entry)
+    file_menu.add_command(label='Overview', command=create_overview)
+    file_menu.add_command(label='History', command=create_history)
+    file_menu.add_command(label='Chart', command=create_chart)
+
+    # repeat with second submenu
+    export_menu = tk.Menu(menu)
+    menu.add_cascade(label='Export', menu=export_menu)
+    export_menu.add_command(label='To CSV', command=lambda: create_export('csv'))
+    export_menu.add_command(label='To xlsx', command=lambda: create_export('xlsx'))
+
+    # repeat with third submenu
+    help_menu = tk.Menu(menu)
+    menu.add_cascade(label='Help', menu=help_menu)
+    help_menu.add_command(label='Files')
+    help_menu.add_command(label='New entry')
+    help_menu.add_command(label='Overview')
+    help_menu.add_command(label='History')
+    help_menu.add_command(label='Chart')
+    help_menu.add_command(label='Export')
+
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
+create_menu()
 create_overview()
 # run whole app
 window.mainloop()
