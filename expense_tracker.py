@@ -2,13 +2,13 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime
-import pandas
+import pandas as pd
 # ------------------------- app initialisation -------------------------
 # app instance
 window = tk.Tk(className='Expense tracker')
 
 # size of tkinter window
-w = 800
+w = 1000
 h = 800
 # common variables
 bg_common = '#626262'
@@ -21,7 +21,12 @@ relief = 'solid'
 screen_w = window.winfo_screenwidth()
 screen_h = window.winfo_screenheight()
 
-# get coordinates of windows top left corner, to place it in middle
+# get coordinates of windows bottom left corner, to place it in middle
+### 
+# divide whole screen in 2 - appear at middle of the screen
+# then move half of actual app to the left - get most left point (do same with height)
+# put starting point on that left bottom corner, app border goes right for width, up for height
+###
 x = (screen_w / 2) - (w / 2)
 y = (screen_h / 2) - (h / 2)
 
@@ -51,7 +56,7 @@ def reset_window():
 
 # ------------------------- load acounts (single) -------------------------
 # global var to display chosen acount on button that opens choice menu
-# define acount for visual (and later to write into file)
+# keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
 selected_label = tk.StringVar()
 selected_label.set('Select Acount')
 # create new window with selections
@@ -60,14 +65,14 @@ def load_acount_single(label_var):
     def select_item(event):
         # get the widget
         listbox = event.widget
-        # get the selection
+        # get the selection (returns indexes of selection - choosing 2-nd acount gives '1')
         selected = listbox.curselection()
         # if selecting empty space or similar, don't react
         if not selected:
             return
-        # retrieve selection values
+        # retrieve selection values (take first element from indexes list, becouse selected only 1 items)
         index = selected[0]
-        selected_value = listbox.get(index)
+        selected_value = listbox.get(index) # actual value from index position
         # set global selected acount label (change button text to see what's selected and write to txt)
         label_var.set(selected_value)
         # close the popup
@@ -91,17 +96,17 @@ def load_acount_single(label_var):
             line = line.strip()
             # divide into account name and class (in file acc-class)
             value, key = line.split('-')
-            # add all values with same key as a list to that key {'key':[a, b, c]}
+            # add all values with same key as a list to that key - {'key':[a, b, c]}
             acc_dict.setdefault(key, []).append(value)
     # create listbox
-    # flatten all values into 1 list
+    # flatten all values into 1 list - {'key1':[a, b], 'key2':[c, d]} -> [a, b, c, d]
     all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
     # convert to tuple and add as listbox variables
     acount_var = tk.Variable(value=tuple(all_acounts))
     # create listbox widget
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.SINGLE)
     listbox.pack()
-    # select an item from list
+    # select an item from list (activate immediately after click)
     listbox.bind('<<ListboxSelect>>', select_item)
     # prevent from opening more windows
     toplevel.grab_set()
@@ -115,17 +120,17 @@ def save_entry(amount, text):
     # get the date of input
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     # get the direction (spent or gain money)
-    # get amount in text form without spaces
+    # get amount in text form without spaces - '- 20', '-20', ' - 20' -> '-20' (prevent problems from different input)
     amount_text = amount.get().strip()
     # add gain/spent variable depending on symbol +/-/nothing
     if amount_text.startswith('-'):
-        state = 'spent'
-        amount_text = amount_text[1:].strip()
+        state = '-'
+        amount_text = amount_text[1:].strip() # save characters after 1-st element (-)
     elif amount_text.startswith('+'):
-        state = 'gain'
+        state = '+'
         amount_text = amount_text[1:].strip()
     else:
-        state = 'gain'
+        state = '+'
     # convert amount text to number (float)
     amount_val = float(amount_text)
     # write into file
@@ -224,11 +229,14 @@ def multi_choice_acount(label_var):
         # gather selected acounts
         selected = listbox.curselection()
         if not selected:
-            return
+            return ''
+        # gather actual values - change list of indexes to actual values of those indexes
         selected_acounts = [listbox.get(i) for i in selected]
+        # save list as string
         selected_list = ', '.join(selected_acounts)
-        selected_label = selected_list
-        # shorten visual representation if too long
+        # save selected acounts (all of them, passed for creating table)
+        selected_label.set(selected_list)
+        # shorten visual representation if too long (show on button)
         label_var.set(selected_list if len(selected_acounts) <= 3 else ', '.join(selected_acounts[:3]) + '...')
         # close window 
         listbox.master.destroy()
@@ -240,6 +248,7 @@ def multi_choice_acount(label_var):
             value, key = line.split('-')
             acc_dict.setdefault(key, []).append(value)
     all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
+    all_acounts.append('all') # add posibility to choose all acounts from list
     acount_var = tk.Variable(value=tuple(all_acounts))
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
@@ -247,8 +256,47 @@ def multi_choice_acount(label_var):
     button.pack()
     toplevel.grab_set()
 # ------------------------- display pandas table -------------------------
+# create pandas table filtered by acount
+def create_table():
+    # create dataframe
+    df = pd.read_csv('finance_test.txt', sep='|')
+    # get acount list for filter
+    if selected_label.get() == 'all':
+        return df
+    else:
+        acount_list = selected_label.get().split(',')
+        acount_list = [acc.strip() for acc in acount_list]
+        # filter by acounts
+        filtered_df = df[df['acount'].isin(acount_list)]
+        print(acount_list)
+        return filtered_df
+# display table in window
 def display_table():
-    return
+    reset_window()
+    # create widget
+    tree = ttk.Treeview(main_frame)
+    # config columns
+    tree['columns'] = ('date', 'gain/spent', 'amount', 'purpose')
+    # display column names
+    tree.heading('#0', text='acount')
+    tree.heading('date', text='date')
+    tree.heading('gain/spent', text='gain/spent')
+    tree.heading('amount', text='amount')
+    tree.heading('purpose', text='purpose')
+    # populate treeview grouped by acount
+    df = create_table()
+    # group by acount
+    grouped_df = df.groupby('acount')
+    for acount, group in grouped_df:
+        # get total
+        total = group['amount'].sum()
+        # input parent (acount name) and total
+        parent_id = tree.insert('', tk.END, text=f'{acount} (Total: {total:.2f})')
+        # go through all rows based on acount
+        for _, row in group.iterrows():
+            # insert values
+            tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['purpose']))
+    tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
 
 # ------------------------- overview UI -------------------------
 def create_overview():
@@ -403,6 +451,6 @@ def create_menu():
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
 create_menu()
-create_overview()
+create_history()
 # run whole app
 window.mainloop()
