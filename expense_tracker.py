@@ -1,6 +1,7 @@
 # ------------------------- dependencies -------------------------
 import tkinter as tk
 from tkinter import ttk
+from tkinter.messagebox import showinfo
 import datetime
 import pandas as pd
 # ------------------------- app initialisation -------------------------
@@ -213,7 +214,6 @@ def create_entry():
 # ------------------------- multi-choice acount select -------------------------
 selected_labels = tk.StringVar()
 selected_labels.set('Select Acounts')
-from tkinter.messagebox import showinfo
 def multi_choice_acount(label_var):
     # create popup
     toplevel = tk.Toplevel(main_frame)
