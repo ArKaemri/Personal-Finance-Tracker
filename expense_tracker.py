@@ -24,9 +24,9 @@ screen_h = window.winfo_screenheight()
 
 # get coordinates of windows bottom left corner, to place it in middle
 ### 
-# divide whole screen in 2 - appear at middle of the screen
+# divide whole screen in 2 - point at middle of the screen
 # then move half of actual app to the left - get most left point (do same with height)
-# put starting point on that left bottom corner, app border goes right for width, up for height
+# start building app from gotten point (left-bottom pixel), app border goes right for width, up for height (app centered)
 ###
 x = (screen_w / 2) - (w / 2)
 y = (screen_h / 2) - (h / 2)
@@ -61,6 +61,11 @@ def reset_window():
 selected_label = tk.StringVar()
 selected_label.set('Select Acount')
 # create new window with selections
+###
+# on button open new window for acounts selection using listbox
+# read acount txt file and split them in acount and class (account1-live \n acount2-live -> {'live':[acount1, acount2]})
+# put acounts in the listbox and activate script (saving selection) after clicking on acount + close the popup
+###
 def load_acount_single(label_var):
     # function to select item from listbox
     def select_item(event):
@@ -113,6 +118,12 @@ def load_acount_single(label_var):
     toplevel.grab_set()
     
 # ------------------------- save entry inputs -------------------------
+###
+# takes data from widgets (saved acount and inputs)
+# transform the data: amount (split to state -/+ and format .00); 
+#                     purpose (text to lowercase to not acidentaly make 2 seperate purposes Gift and gift - same, but code will think different)
+# add inputs to txt, then reset window and replace widgets with empty ones
+###
 def save_entry(amount, text):
     # get selected acount
     acount = selected_label.get()
@@ -144,6 +155,9 @@ def save_entry(amount, text):
     create_entry()
     
 # ------------------------- add acount -------------------------
+###
+# on button open popup to input acount which is saved to acount txt as <input>-live
+###
 def add_new_acount():
     # create popup
     toplevel = tk.Toplevel(main_frame)
@@ -174,6 +188,9 @@ def add_new_acount():
     toplevel.grab_set()
 
 # ------------------------- entry UI -------------------------
+###
+# create and display widgets for entry window (add new information to finance.txt)
+###
 # add entry window
 def create_entry():
     # delete widgets on the screen
@@ -212,6 +229,9 @@ def create_entry():
     button.pack(pady=20)
     
 # ------------------------- multi-choice acount select -------------------------
+###
+# same as load_acount_single, but choose acounts on button press (not on mouse click) and can choose multiple choices
+###
 selected_labels = tk.StringVar()
 selected_labels.set('Select Acounts')
 def multi_choice_acount(label_var):
@@ -255,7 +275,13 @@ def multi_choice_acount(label_var):
     button = tk.Button(toplevel, text='Confirm', command=save_selection)
     button.pack()
     toplevel.grab_set()
+    
 # ------------------------- display pandas table -------------------------
+###
+# read txt file and create pandas table, keep only rows that have same acount as chosen acounts from popup (create_table)
+# creat trieview widget that saves dataframe object
+# group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
+###
 # create pandas table filtered by acount
 def create_table():
     # create dataframe
@@ -299,6 +325,9 @@ def display_table():
     tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
 
 # ------------------------- overview UI -------------------------
+###
+# create and display widgets for overview window (table of finance.txt file)
+###
 def create_overview():
     reset_window()
     selected_labels.set('Select Acounts')
@@ -320,6 +349,9 @@ def create_overview():
     button.pack(pady=20)
     
 # ------------------------- history UI -------------------------
+###
+# create and display widgets for history window (matplotlib line graph of finance.txt)
+###
 def create_history():
     reset_window()
     # label of the window
@@ -348,6 +380,9 @@ def create_history():
     button.pack(pady=20)
     
 # ------------------------- chart UI -------------------------
+###
+# create and display widgets for chart window (matplotlib pie chart of finance.txt)
+###
 def create_chart():
     reset_window()
     # label of the window
@@ -368,6 +403,9 @@ def create_chart():
     button.pack(pady=20)
 
 # ------------------------- export UI -------------------------
+###
+# create and display widgets for export window (export finance.txt as .csv or .xlsx)
+###
 def create_export(file_type):
     # choose text based on menu selection
     if file_type == 'csv':
@@ -416,6 +454,9 @@ def create_export(file_type):
     button.pack(pady=20)
 
 # ------------------------- create menu -------------------------
+###
+# create and display menu for changing windows
+###
 # create main menu (whole top bar where all options reside)
 def create_menu():
     menu = tk.Menu(window)
