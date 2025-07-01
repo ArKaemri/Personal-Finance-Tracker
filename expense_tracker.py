@@ -3,8 +3,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 import datetime
-import dateutil.relativedelta as relativedelta
+from dateutil.relativedelta import relativedelta
 import pandas as pd
+from matplotlib.figure import Figure
+import matplotlib.dates as mdates
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 # ------------------------- app initialisation -------------------------
 # app instance
 window = tk.Tk(className='Expense tracker')
@@ -284,7 +287,7 @@ def multi_choice_acount(label_var):
 # group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
 ###
 selected_date = tk.StringVar()
-selected_date.set('this month')
+selected_date.set('1 month')
 # create pandas table filtered by acount
 def create_table():
     # create dataframe
@@ -299,30 +302,38 @@ def create_table():
     # filter by time
     def filter_time(dataframe):
         date = selected_date.get()
-        max_date = datetime.now()
-        match date:
-            case 'this month':
-                min_date = max_date.replace(day=1)
-            case '3 months':
-                min_date = max_date - relativedelta(months=3)
-            case '6 months':
-                min_date = max_date - relativedelta(months=6)
-            case '9 months':
-                min_date = max_date - relativedelta(months=9)
-            case '1 year':
-                min_date = max_date - relativedelta(year=1)
+        # calculate date (n month from the date of last input (not from current day))
+        max_date = dataframe['date'].max().normalize()
+        if date == '1 month':
+            min_date = max_date - pd.DateOffset(months=1)
+        elif date == '3 months':
+            min_date = max_date - pd.DateOffset(months=3)
+        elif date == '6 months':
+            min_date = max_date - pd.DateOffset(months=6)
+        elif date == '9 months':
+            min_date = max_date - pd.DateOffset(months=9)
+        elif date == '1 year':
+            min_date = max_date - pd.DateOffset(year=1)
+        elif date == 'all time':
+            return dataframe
+        else:
+            min_date = dataframe['date'].min()
         filtered_df = dataframe[(dataframe['date'] >= min_date) & (dataframe['date'] <= max_date)]
         return filtered_df
+    # add column for cumulative amount (how much amount is total at specific date)
+    df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1)
+    df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum()
     # get acount list for filter
     if selected_label.get() == 'all' and selected_date.get() == 'all time':
         return df
     elif selected_label.get() != 'all' and selected_date.get() == 'all time':
         # filter by acounts
-        filtered_df = filter_acount()
-        return filtered_df        
+        filtered_df = filter_acount(df)
+        return filtered_df       
     elif selected_label.get() == 'all' and selected_date.get() != 'all time':
-        filtered_df = filter_time()
-        return filtered_df
+        # filter by acounts
+        filtered_df = filter_time(df)
+        return filtered_df  
     else:
         filtered_df = filter_acount(df)
         filtered_df = filter_time(filtered_df)
@@ -382,10 +393,41 @@ def create_overview():
     
 # ------------------------- plot history graph -------------------------
 ###
-#
+# display scatter plot with connected lines of changing amount for selected acounts
+# y axis - date, x axis - amount, each date is total amount at that moment
+# example: 2025-02-16 +30.00, 2025-02-17 - 20.00 -> 2025-02-16 = 30.00, 2025-02-17 = 10.00
 ###
 def plot_graph():
     reset_window()
+    # get values
+    df = create_table()
+    # create graph
+    fig = Figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+    for acount, group in df.groupby('acount'):
+        x = group['date']
+        y = group['current_amount']
+        ax.scatter(x, y, label=acount)
+        ax.plot(x, y)
+        for x, y in zip(x, y):
+            ax.text(x, y, f'{y:.2f}', ha='center', va='bottom')
+    # config plot
+    ax.set_title('Finance history graph')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Amount')
+    ax.legend()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    fig.autofmt_xdate()
+    # place canvas
+    canvas = FigureCanvasTkAgg(fig, master=main_frame)
+    canvas.draw()
+    # create toolbar
+    toolbar = NavigationToolbar2Tk(canvas, main_frame)
+    toolbar.update()
+    # place toolbar
+    canvas.get_tk_widget().pack()
+    # reset time variable
     selected_date.set('this month')
 
 # ------------------------- history UI -------------------------
@@ -410,7 +452,7 @@ def create_history():
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
     date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['This month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
     date.pack()
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
