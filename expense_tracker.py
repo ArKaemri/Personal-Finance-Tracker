@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 import datetime
+import dateutil.relativedelta as relativedelta
 import pandas as pd
 # ------------------------- app initialisation -------------------------
 # app instance
@@ -278,24 +279,55 @@ def multi_choice_acount(label_var):
     
 # ------------------------- display pandas table -------------------------
 ###
-# read txt file and create pandas table, keep only rows that have same acount as chosen acounts from popup (create_table)
+# read txt file and create pandas table, keep only rows that have same acount as chosen acounts from popup and date (create_table)
 # creat trieview widget that saves dataframe object
 # group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
 ###
+selected_date = tk.StringVar()
+selected_date.set('this month')
 # create pandas table filtered by acount
 def create_table():
     # create dataframe
     df = pd.read_csv('finance_test.txt', sep='|')
-    # get acount list for filter
-    if selected_label.get() == 'all':
-        return df
-    else:
+    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+    # filter by acount
+    def filter_acount(dataframe):
         acount_list = selected_label.get().split(',')
         acount_list = [acc.strip() for acc in acount_list]
-        # filter by acounts
-        filtered_df = df[df['acount'].isin(acount_list)]
-        print(acount_list)
+        filtered_df = dataframe[dataframe['acount'].isin(acount_list)]
         return filtered_df
+    # filter by time
+    def filter_time(dataframe):
+        date = selected_date.get()
+        max_date = datetime.now()
+        match date:
+            case 'this month':
+                min_date = max_date.replace(day=1)
+            case '3 months':
+                min_date = max_date - relativedelta(months=3)
+            case '6 months':
+                min_date = max_date - relativedelta(months=6)
+            case '9 months':
+                min_date = max_date - relativedelta(months=9)
+            case '1 year':
+                min_date = max_date - relativedelta(year=1)
+        filtered_df = dataframe[(dataframe['date'] >= min_date) & (dataframe['date'] <= max_date)]
+        return filtered_df
+    # get acount list for filter
+    if selected_label.get() == 'all' and selected_date.get() == 'all time':
+        return df
+    elif selected_label.get() != 'all' and selected_date.get() == 'all time':
+        # filter by acounts
+        filtered_df = filter_acount()
+        return filtered_df        
+    elif selected_label.get() == 'all' and selected_date.get() != 'all time':
+        filtered_df = filter_time()
+        return filtered_df
+    else:
+        filtered_df = filter_acount(df)
+        filtered_df = filter_time(filtered_df)
+        return filtered_df
+    
 # display table in window
 def display_table():
     reset_window()
@@ -348,6 +380,14 @@ def create_overview():
     button = tk.Button(main_frame, text='Show', command=display_table, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
+# ------------------------- plot history graph -------------------------
+###
+#
+###
+def plot_graph():
+    reset_window()
+    selected_date.set('this month')
+
 # ------------------------- history UI -------------------------
 ###
 # create and display widgets for history window (matplotlib line graph of finance.txt)
@@ -362,21 +402,20 @@ def create_history():
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
     acounts.pack()
-    acounts.current(0)
     spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer2.pack()
     # date choice - currently just UI 
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18), state='readonly')
+    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
+    date['values'] = ['This month', '3 months', '6 months', '9 months', '1 year', 'all']
     date.pack()
-    date.current(0)
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=plot_graph, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
 # ------------------------- chart UI -------------------------
@@ -393,9 +432,8 @@ def create_chart():
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
     acounts.pack()
-    acounts.current(0)
     spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
     spacer2.pack()
     # button to activate
@@ -422,9 +460,8 @@ def create_export(file_type):
     # acount choice, currently just UI element
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = ttk.Combobox(main_frame, values=['temp1', 'temp2'], font=('System', 18), state='readonly')
+    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
     acounts.pack()
-    acounts.current(0)
     spacer1 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer1.pack()
     # date choice - currently just UI 
