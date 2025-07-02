@@ -460,6 +460,48 @@ def create_history():
     button = tk.Button(main_frame, command=plot_graph, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
     
+# ------------------------- pie chart plot -------------------------
+###
+# display 2 pie charts for 1 acount, 1-st for spending, 2-nd for earning
+# calculate total spending/earning and plot how much of total % is each reason (where spent/earnt the money)
+###
+def plot_chart():
+    reset_window()
+    df = create_table()
+    # label of what acount chosen
+    label = tk.Label(main_frame, text=f'{selected_label.get()} earning/spending', background=bg_common, foreground=fg, font=('System', 18))
+    label.pack(pady=5)
+    # find total spending/earning
+    total_earning = df[df['symbol'] == '+']['amount'].sum()
+    total_spending = df[df['symbol'] == '-']['amount'].sum()
+    # earning pie 
+    # frame for 1 chart
+    frame1 = tk.Frame(main_frame)
+    frame1.pack(side='left', padx=10)
+    # label with total
+    label1 = tk.Label(frame1, text=f'Earning chart (Total: {total_earning:.2f})')
+    label1.pack()
+    # purposes and their % from total  
+    percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
+    # figure
+    fig1 = Figure(figsize=(5, 5))
+    ax1 = fig1.add_subplot(111)
+    ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
+    # spending pie
+    frame2 = tk.Frame(main_frame)
+    frame2.pack(side='right', padx=10)
+    label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})')
+    label2.pack()
+    percent2 = df[df['symbol'] == '-'].groupby('purpose')['amount'].sum()
+    fig2 = Figure(figsize=(5, 5))
+    ax2 = fig2.add_subplot(111)
+    ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
+    # finalise
+    canvas1 = FigureCanvasTkAgg(fig1, master=frame1)
+    canvas2 = FigureCanvasTkAgg(fig2, master=frame2)
+    canvas1.get_tk_widget().pack()
+    canvas2.get_tk_widget().pack()
+ 
 # ------------------------- chart UI -------------------------
 ###
 # create and display widgets for chart window (matplotlib pie chart of finance.txt)
@@ -469,17 +511,25 @@ def create_chart():
     # label of the window
     header = tk.Label(main_frame, text='Earning/Spending Chart', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
-    spacer1 = tk.Frame(main_frame, height=180, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer1.pack()
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
+    acounts = tk.Button(main_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_common, foreground=fg)
     acounts.pack()
-    spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer2.pack()
+    # date choice - currently just UI 
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label.pack(pady=5)
+    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date.pack()
+    spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
+    spacer3.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=plot_chart, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
 
 # ------------------------- export UI -------------------------
@@ -571,6 +621,6 @@ def create_menu():
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
 create_menu()
-create_history()
+create_chart()
 # run whole app
 window.mainloop()
