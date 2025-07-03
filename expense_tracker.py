@@ -5,7 +5,9 @@ from tkinter.messagebox import showinfo
 import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
+import os
 from matplotlib.figure import Figure
+from tkinter import filedialog
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 # ------------------------- app initialisation -------------------------
@@ -534,6 +536,33 @@ def create_chart():
 
 # ------------------------- export UI -------------------------
 ###
+# export whole data (with cumulative + current amounts) into .csv or .xlsx formats
+# take file name and path, pass to to_excel or to_csv functions
+###
+def export_data(type, name):
+    df = create_table()
+    file_name = name.get()
+    file_dest = filedialog.askdirectory(title='Select folder to save file')
+    if not file_dest:
+        print('no folder selected')
+        return
+    os.makedirs(file_dest, exist_ok=True)
+    file_path = os.path.join(file_dest, f'{file_name}.{type}')
+    print(file_path)
+    
+    if type == 'csv':
+        df.to_csv(file_path, index=False)
+    else:
+        df.to_excel(file_path, index=False)
+        
+    reset_window()
+    selected_date.set('1 month')
+    selected_label.set('Select Acounts')
+    selected_labels.set('Select Acounts')
+    create_export(type)
+
+# ------------------------- export UI -------------------------
+###
 # create and display widgets for export window (export finance.txt as .csv or .xlsx)
 ###
 def create_export(file_type):
@@ -559,9 +588,9 @@ def create_export(file_type):
     # date choice - currently just UI 
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, values=['1 month', '3 months'], font=('System', 18), state='readonly')
+    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
     date.pack()
-    date.current(0)
     spacer2 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer2.pack()
     # file name input field
@@ -571,15 +600,10 @@ def create_export(file_type):
     name.pack()
     spacer3 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer3.pack()
-    # file destination input field
-    destination_label = tk.Label(main_frame, text='Where to save file', background=bg_common, foreground=fg, font=('System', 18))
-    destination_label.pack(pady=5)
-    destination = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
-    destination.pack()
     spacer4 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, text=button_choice, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=lambda: export_data(file_type, name), text=button_choice, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     button.pack(pady=20)
 
 # ------------------------- create menu -------------------------
@@ -621,6 +645,6 @@ def create_menu():
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
 create_menu()
-create_chart()
+create_export('xlsx')
 # run whole app
 window.mainloop()
