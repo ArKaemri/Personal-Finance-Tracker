@@ -289,7 +289,7 @@ def multi_choice_acount(label_var):
 # group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
 ###
 selected_date = tk.StringVar()
-selected_date.set('1 month')
+selected_date.set('all time')
 # create pandas table filtered by acount
 def create_table():
     # create dataframe
@@ -331,14 +331,17 @@ def create_table():
     elif selected_label.get() != 'all' and selected_date.get() == 'all time':
         # filter by acounts
         filtered_df = filter_acount(df)
+        filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df       
     elif selected_label.get() == 'all' and selected_date.get() != 'all time':
         # filter by acounts
         filtered_df = filter_time(df)
+        filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df  
     else:
         filtered_df = filter_acount(df)
         filtered_df = filter_time(filtered_df)
+        filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df
     
 # display table in window
@@ -380,14 +383,22 @@ def create_overview():
     # label of the window
     header = tk.Label(main_frame, text='Finance Overview', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
-    spacer1 = tk.Frame(main_frame, height=180, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer1.pack()
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acounts', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
     acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
     acounts.pack()
-    spacer2 = tk.Frame(main_frame, height=300, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer2.pack()
+    # date
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label.pack(pady=5)
+    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date.pack()
+    spacer2 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer2.pack()
     # button to activate
     button = tk.Button(main_frame, text='Show', command=display_table, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
@@ -556,7 +567,7 @@ def export_data(type, name):
         df.to_excel(file_path, index=False)
         
     reset_window()
-    selected_date.set('1 month')
+    selected_date.set('all time')
     selected_label.set('Select Acounts')
     selected_labels.set('Select Acounts')
     create_export(type)
