@@ -1,9 +1,7 @@
 # ------------------------- dependencies -------------------------
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showinfo
 import datetime
-from dateutil.relativedelta import relativedelta
 import pandas as pd
 import os
 from matplotlib.figure import Figure
@@ -358,10 +356,10 @@ def display_table():
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
     # config columns width
-    tree.column('date', width=100)
-    tree.column('gain/spent', width=100)
-    tree.column('amount', width=140)
-    tree.column('current amount', width=140)
+    tree.column('date', width=60)
+    tree.column('gain/spent', width=60)
+    tree.column('amount', width=100)
+    tree.column('current amount', width=100)
     # populate treeview grouped by acount
     df = create_table()
     # group by acount
@@ -402,7 +400,7 @@ def create_overview():
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
     date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
     date.pack()
     spacer2 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer2.pack()
@@ -471,7 +469,7 @@ def create_history():
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
     date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
     date.pack()
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
@@ -543,7 +541,7 @@ def create_chart():
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
     date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
     date.pack()
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
@@ -606,7 +604,7 @@ def create_export(file_type):
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
     date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all']
+    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
     date.pack()
     spacer2 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer2.pack()
