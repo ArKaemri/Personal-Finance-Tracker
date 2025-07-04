@@ -323,8 +323,8 @@ def create_table():
         filtered_df = dataframe[(dataframe['date'] >= min_date) & (dataframe['date'] <= max_date)]
         return filtered_df
     # add column for cumulative amount (how much amount is total at specific date)
-    df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1)
-    df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum()
+    df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1).apply(lambda x: round(x, 2))
+    df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum().apply(lambda x: round(x, 2))
     # get acount list for filter
     if selected_label.get() == 'all' and selected_date.get() == 'all time':
         return df
@@ -349,14 +349,19 @@ def display_table():
     reset_window()
     # create widget
     tree = ttk.Treeview(main_frame)
-    # config columns
-    tree['columns'] = ('date', 'gain/spent', 'amount', 'purpose')
+    tree['columns'] = ('date', 'gain/spent', 'amount', 'current amount', 'purpose')
     # display column names
     tree.heading('#0', text='acount')
-    tree.heading('date', text='date')
-    tree.heading('gain/spent', text='gain/spent')
-    tree.heading('amount', text='amount')
-    tree.heading('purpose', text='purpose')
+    tree.heading('date', text='Date')
+    tree.heading('gain/spent', text='Gain/Spent')
+    tree.heading('amount', text='Amount')
+    tree.heading('current amount', text='Current amount')
+    tree.heading('purpose', text='Purpose')
+    # config columns width
+    tree.column('date', width=100)
+    tree.column('gain/spent', width=100)
+    tree.column('amount', width=140)
+    tree.column('current amount', width=140)
     # populate treeview grouped by acount
     df = create_table()
     # group by acount
@@ -369,7 +374,8 @@ def display_table():
         # go through all rows based on acount
         for _, row in group.iterrows():
             # insert values
-            tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['purpose']))
+            round(row['current_amount'], 2)
+            tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['current_amount'], row['purpose']))
     tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
 
 # ------------------------- overview UI -------------------------
@@ -656,6 +662,6 @@ def create_menu():
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
 create_menu()
-create_export('xlsx')
+create_entry()
 # run whole app
 window.mainloop()
