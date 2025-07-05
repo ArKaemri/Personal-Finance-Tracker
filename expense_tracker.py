@@ -13,7 +13,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 window = tk.Tk(className='Expense tracker')
 
 # size of tkinter window
-w = 1000
+w = 840
 h = 800
 # common variables
 bg_common = '#626262'
@@ -88,8 +88,8 @@ def load_acount_single(label_var):
         # close the popup
         listbox.master.destroy()
         
-    top_w = 400
-    top_h = 400
+    top_w = 220
+    top_h = 220
     # create and position window
     toplevel = tk.Toplevel(main_frame)
     top_sw = toplevel.winfo_screenwidth()
@@ -166,7 +166,7 @@ def add_new_acount():
     # create popup
     toplevel = tk.Toplevel(main_frame)
     top_w = 200
-    top_h = 200
+    top_h = 140
     top_sw = toplevel.winfo_screenwidth()
     top_sh = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -174,9 +174,9 @@ def add_new_acount():
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
     # add entry
     new_label = tk.Label(toplevel, text='Input new acount')
-    new_label.pack()
+    new_label.pack(pady=10)
     new_entry = tk.Entry(toplevel)
-    new_entry.pack(pady=20)
+    new_entry.pack(pady=10)
     # entry function
     def new_acount():
         # get variable from entry
@@ -188,7 +188,7 @@ def add_new_acount():
         toplevel.destroy()
     # add confirm button
     new_button = tk.Button(toplevel, text='Confirm', command=new_acount)
-    new_button.pack()
+    new_button.pack(pady=10)
     toplevel.grab_set()
 
 # ------------------------- entry UI -------------------------
@@ -208,10 +208,12 @@ def create_entry():
     # acount choice, currently just UI element
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_common, foreground=fg)
-    acounts.pack()
-    add_acount = tk.Button(main_frame, text='+', command=add_new_acount, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg)
-    add_acount.pack()
+    button_frame = tk.Frame(main_frame) # to position acount buttons in row
+    button_frame.pack()
+    acounts = tk.Button(button_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts.pack(side=tk.LEFT, padx=0, pady=0)
+    add_acount = tk.Button(button_frame, text='+', command=add_new_acount, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    add_acount.pack(side=tk.LEFT, padx=0, pady=0)
     spacer2 = tk.Frame(main_frame, height=80, background=bg_common)
     spacer2.pack()
     # amount input field
@@ -229,7 +231,7 @@ def create_entry():
     spacer4 = tk.Frame(main_frame, height=80, background=bg_common)
     spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 17))
     button.pack(pady=20)
     
 # ------------------------- multi-choice acount select -------------------------
@@ -356,10 +358,11 @@ def display_table():
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
     # config columns width
-    tree.column('date', width=60)
-    tree.column('gain/spent', width=60)
-    tree.column('amount', width=100)
-    tree.column('current amount', width=100)
+    tree.column('date', width=70)
+    tree.column('gain/spent', width=60, anchor=tk.CENTER)
+    tree.column('amount', width=100, anchor=tk.CENTER)
+    tree.column('current amount', width=100, anchor=tk.CENTER)
+    tree.column('purpose', anchor=tk.CENTER)
     # populate treeview grouped by acount
     df = create_table()
     # group by acount
@@ -392,7 +395,7 @@ def create_overview():
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acounts', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     acounts.pack()
     spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer2.pack()
@@ -461,7 +464,7 @@ def create_history():
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     acounts.pack()
     spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer2.pack()
@@ -501,7 +504,7 @@ def plot_chart():
     # purposes and their % from total  
     percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
     # figure
-    fig1 = Figure(figsize=(5, 5))
+    fig1 = Figure(figsize=(4, 4))
     ax1 = fig1.add_subplot(111)
     ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
     # spending pie
@@ -510,7 +513,7 @@ def plot_chart():
     label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})')
     label2.pack()
     percent2 = df[df['symbol'] == '-'].groupby('purpose')['amount'].sum()
-    fig2 = Figure(figsize=(5, 5))
+    fig2 = Figure(figsize=(4, 4))
     ax2 = fig2.add_subplot(111)
     ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
     # finalise
@@ -533,7 +536,7 @@ def create_chart():
     # account choice
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_common, foreground=fg)
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     acounts.pack()
     spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
     spacer2.pack()
@@ -596,7 +599,7 @@ def create_export(file_type):
     # acount choice, currently just UI element
     acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_common, foreground=fg)
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     acounts.pack()
     spacer1 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer1.pack()
