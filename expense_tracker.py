@@ -424,13 +424,13 @@ def plot_graph():
     # create graph
     fig = Figure(figsize=(10, 6))
     ax = fig.add_subplot(111)
+    scatter_plots = [] # need to store multiple accounts for hover
     for acount, group in df.groupby('acount'):
         x = group['date']
         y = group['current_amount']
-        ax.scatter(x, y, label=acount)
+        sc = ax.scatter(x, y, label=acount, picker=True) # let interactive function (hover)
         ax.plot(x, y)
-        for x, y in zip(x, y):
-            ax.text(x, y, f'{y:.2f}', ha='center', va='bottom')
+        scatter_plots.append((sc, group)) # append scatter plot and actual data
     # config plot
     ax.set_title('Finance history graph')
     ax.set_xlabel('Date')
@@ -445,6 +445,53 @@ def plot_graph():
     # create toolbar
     toolbar = NavigationToolbar2Tk(canvas, main_frame)
     toolbar.update()
+    # anotation object (show data when hovering on point)
+    ###
+    # create empty annotation object that displays nothing and save every scatter point and their actual dataframes (for multiple accounts)
+    # check if mouse hovering inside the plot, if yes, check if it is near any point
+    # if mouse is near the point, go through every scatter plot and find close points
+    # when mouse is on the point get the row of location in any scatter point and display annotation
+    ###
+    annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder
+                        bbox = dict(boxstyle='round', fc='w'), # background of annotation
+                        arrowprops = dict(arrowstyle='->')) # show which point is hovered
+    annot.set_visible(False)
+    # update annotation
+    def update_annot(sc, ind, group):
+        # get coordinates of hovered object
+        x, y = sc.get_offsets()[ind['ind'][0]]
+        # get date value 
+        date_str = group.iloc[ind['ind'][0]]['date'].strftime('%Y-%m-%d')
+        # get amount value
+        amount = group.iloc[ind['ind'][0]]['current_amount']
+        # get coordinates
+        annot.xy = (x, y)
+        # format and set text
+        text = f'{date_str}\n{amount:.2f}'
+        annot.set_text(text)
+    # hover function
+    def hover(event):
+        # get current visibility (do annotation exist currently or not)
+        vis = annot.get_visible()
+        # if mouse point inside the plot
+        if event.inaxes == ax:
+            # go through all scatter points and actual data
+            for sc, group in scatter_plots:
+                # check if mouse is near a point in any scatter plot
+                cont, ind = sc.contains(event)
+                # if mouse is on the point
+                if cont:
+                    # get the annotation and draw it
+                    update_annot(sc, ind, group)
+                    annot.set_visible(True)
+                    canvas.draw_idle()
+                    return
+        # if annotation was visible before (from earliear hover)
+        if vis:
+            annot.set_visible(False)
+            canvas.draw_idle()
+    # connect hover function to plot
+    canvas.mpl_connect('motion_notify_event', hover)
     # place toolbar
     canvas.get_tk_widget().pack()
     # reset time variable
