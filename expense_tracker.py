@@ -26,6 +26,18 @@ relief = 'solid'
 screen_w = window.winfo_screenwidth()
 screen_h = window.winfo_screenheight()
 
+# treeview style
+style = ttk.Style()
+style.theme_use('default')
+style.configure('Treeview',
+                background=bg_common,
+                fieldbackground=bg_active)
+style.configure('Treeview.Heading',
+                background=bg_passive,
+                foreground=fg)
+style.map('Treeview.Heading',
+          background=[('active', bg_passive)])
+
 # get coordinates of windows bottom left corner, to place it in middle
 ### 
 # divide whole screen in 2 - point at middle of the screen
@@ -92,6 +104,7 @@ def load_acount_single(label_var):
     top_h = 220
     # create and position window
     toplevel = tk.Toplevel(main_frame)
+    toplevel.configure(background=bg_active)
     top_sw = toplevel.winfo_screenwidth()
     top_hw = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -116,6 +129,8 @@ def load_acount_single(label_var):
     # create listbox widget
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.SINGLE)
     listbox.pack()
+    # colors
+    listbox.configure(background=bg_common, foreground=fg)
     # select an item from list (activate immediately after click)
     listbox.bind('<<ListboxSelect>>', select_item)
     # prevent from opening more windows
@@ -165,6 +180,7 @@ def save_entry(amount, text):
 def add_new_acount():
     # create popup
     toplevel = tk.Toplevel(main_frame)
+    toplevel.configure(background=bg_passive)
     top_w = 200
     top_h = 140
     top_sw = toplevel.winfo_screenwidth()
@@ -173,9 +189,9 @@ def add_new_acount():
     top_y = (top_sh / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
     # add entry
-    new_label = tk.Label(toplevel, text='Input new acount')
+    new_label = tk.Label(toplevel, text='Input new acount', background=bg_passive, foreground=fg)
     new_label.pack(pady=10)
-    new_entry = tk.Entry(toplevel)
+    new_entry = tk.Entry(toplevel, background=bg_active)
     new_entry.pack(pady=10)
     # entry function
     def new_acount():
@@ -187,7 +203,7 @@ def add_new_acount():
         # close popup
         toplevel.destroy()
     # add confirm button
-    new_button = tk.Button(toplevel, text='Confirm', command=new_acount)
+    new_button = tk.Button(toplevel, text='Confirm', command=new_acount, background=bg_active, activebackground=bg_common, activeforeground=fg)
     new_button.pack(pady=10)
     toplevel.grab_set()
 
@@ -243,8 +259,9 @@ selected_labels.set('Select Acounts')
 def multi_choice_acount(label_var):
     # create popup
     toplevel = tk.Toplevel(main_frame)
-    top_w = 400
-    top_h = 400
+    toplevel.configure(background=bg_active)
+    top_w = 220
+    top_h = 220
     top_sw = toplevel.winfo_screenwidth()
     top_sh = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -278,7 +295,8 @@ def multi_choice_acount(label_var):
     acount_var = tk.Variable(value=tuple(all_acounts))
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
-    button = tk.Button(toplevel, text='Confirm', command=save_selection)
+    listbox.configure(background=bg_common, foreground=fg)
+    button = tk.Button(toplevel, text='Confirm', command=save_selection, background=bg_passive, foreground=fg, activebackground=bg_common, activeforeground=fg)
     button.pack()
     toplevel.grab_set()
     
@@ -371,13 +389,15 @@ def display_table():
         # get total
         total = group['amount'].sum()
         # input parent (acount name) and total
-        parent_id = tree.insert('', tk.END, text=f'{acount} (Total: {total:.2f})')
+        parent_id = tree.insert('', tk.END, text=f'{acount} (Total: {total:.2f})', tag='account_row')
         # go through all rows based on acount
         for _, row in group.iterrows():
             # insert values
             round(row['current_amount'], 2)
-            tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['current_amount'], row['purpose']))
+            tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['current_amount'], row['purpose']), tag='finance_row')
     tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
+    tree.tag_configure('account_row', background=bg_common, foreground=fg)
+    tree.tag_configure('finance_row', background=bg_active)
 
 # ------------------------- overview UI -------------------------
 ###
@@ -423,7 +443,9 @@ def plot_graph():
     df = create_table()
     # create graph
     fig = Figure(figsize=(10, 6))
+    fig.set_facecolor(bg_active)
     ax = fig.add_subplot(111)
+    ax.set_facecolor(bg_active)
     scatter_plots = [] # need to store multiple accounts for hover
     for acount, group in df.groupby('acount'):
         x = group['date']
@@ -432,10 +454,11 @@ def plot_graph():
         ax.plot(x, y)
         scatter_plots.append((sc, group)) # append scatter plot and actual data
     # config plot
-    ax.set_title('Finance history graph')
     ax.set_xlabel('Date')
     ax.set_ylabel('Amount')
-    ax.legend()
+    legend = ax.legend()
+    legend.get_frame().set_facecolor(bg_active)
+    legend.get_frame().set_edgecolor(fg)
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     fig.autofmt_xdate()
@@ -453,7 +476,7 @@ def plot_graph():
     # when mouse is on the point get the row of location in any scatter point and display annotation
     ###
     annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder
-                        bbox = dict(boxstyle='round', fc='w'), # background of annotation
+                        bbox = dict(boxstyle='round', fc=bg_active, edgecolor=fg), # background of annotation
                         arrowprops = dict(arrowstyle='->')) # show which point is hovered
     annot.set_visible(False)
     # update annotation
@@ -546,23 +569,30 @@ def plot_chart():
     frame1 = tk.Frame(main_frame)
     frame1.pack(side='left', padx=10)
     # label with total
-    label1 = tk.Label(frame1, text=f'Earning chart (Total: {total_earning:.2f})')
-    label1.pack()
+    label1 = tk.Label(frame1, text=f'Earning chart (Total: {total_earning:.2f})', background=bg_active)
+    label1.pack(fill='x')
     # purposes and their % from total  
     percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
     # figure
     fig1 = Figure(figsize=(4, 4))
+    fig1.set_facecolor(bg_passive)
     ax1 = fig1.add_subplot(111)
-    ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
+    _, purposes1, _ = ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
     # spending pie
     frame2 = tk.Frame(main_frame)
     frame2.pack(side='right', padx=10)
-    label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})')
-    label2.pack()
+    label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})', background=bg_active)
+    label2.pack(fill='x')
     percent2 = df[df['symbol'] == '-'].groupby('purpose')['amount'].sum()
     fig2 = Figure(figsize=(4, 4))
+    fig2.set_facecolor(bg_passive)
     ax2 = fig2.add_subplot(111)
-    ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
+    _, purposes2, _ = ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
+    # color labels white
+    for p in purposes1:
+        p.set_color(fg)
+    for p in purposes2:
+        p.set_color(fg)
     # finalise
     canvas1 = FigureCanvasTkAgg(fig1, master=frame1)
     canvas2 = FigureCanvasTkAgg(fig2, master=frame2)
