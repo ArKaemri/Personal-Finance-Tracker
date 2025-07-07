@@ -22,6 +22,16 @@ bg_passive = '#7d7d7d'
 bg_active = '#999999'
 relief = 'solid'
 
+# keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
+selected_label = tk.StringVar()
+selected_label.set('Select Acount')
+
+selected_labels = tk.StringVar()
+selected_labels.set('Select Acounts')
+
+selected_date = tk.StringVar()
+selected_date.set('all time')
+
 # get width/height of the screen
 screen_w = window.winfo_screenwidth()
 screen_h = window.winfo_screenheight()
@@ -73,9 +83,6 @@ def reset_window():
 
 # ------------------------- load acounts (single) -------------------------
 # global var to display chosen acount on button that opens choice menu
-# keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
-selected_label = tk.StringVar()
-selected_label.set('Select Acount')
 # create new window with selections
 ###
 # on button open new window for acounts selection using listbox
@@ -169,7 +176,6 @@ def save_entry(amount, text):
     with open('finance_test.txt', 'a') as file:
         file.write('\n' + output)
     # reset window
-    selected_label.set('Select Acount')
     reset_window()
     create_entry()
     
@@ -254,8 +260,6 @@ def create_entry():
 ###
 # same as load_acount_single, but choose acounts on button press (not on mouse click) and can choose multiple choices
 ###
-selected_labels = tk.StringVar()
-selected_labels.set('Select Acounts')
 def multi_choice_acount(label_var):
     # create popup
     toplevel = tk.Toplevel(main_frame)
@@ -280,7 +284,7 @@ def multi_choice_acount(label_var):
         # save selected acounts (all of them, passed for creating table)
         selected_label.set(selected_list)
         # shorten visual representation if too long (show on button)
-        label_var.set(selected_list if len(selected_acounts) <= 3 else ', '.join(selected_acounts[:3]) + '...')
+        label_var.set(selected_list if len(selected_acounts) <= 2 else ', '.join(selected_acounts[:2]) + '...')
         # close window 
         listbox.master.destroy()
     # display selection
@@ -306,8 +310,34 @@ def multi_choice_acount(label_var):
 # creat trieview widget that saves dataframe object
 # group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
 ###
-selected_date = tk.StringVar()
-selected_date.set('all time')
+# choose time same as single account
+def choose_time(label_var):
+    def select_item(event):
+        listbox = event.widget
+        selected = listbox.curselection()
+        if not selected: 
+            return
+        index = selected[0]
+        selected_value = listbox.get(index)
+        label_var.set(selected_value)
+        listbox.master.destroy()
+    top_w = 220
+    top_h = 220
+    toplevel = tk.Toplevel(main_frame)
+    toplevel.configure(background=bg_active)
+    top_sw = toplevel.winfo_screenwidth()
+    top_hw = toplevel.winfo_screenheight()
+    top_x = (top_sw / 2) - (top_w / 2)
+    top_y = (top_hw / 2) - (top_h / 2)
+    toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    values = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
+    time_var = tk.Variable(value=tuple(values))
+    listbox = tk.Listbox(toplevel, listvariable=time_var, selectmode=tk.SINGLE)
+    listbox.pack()
+    listbox.configure(background=bg_common, foreground=fg)
+    listbox.bind('<<ListboxSelect>>', select_item)
+    toplevel.grab_set()
+    
 # create pandas table filtered by acount
 def create_table():
     # create dataframe
@@ -422,8 +452,7 @@ def create_overview():
     # date
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     date.pack()
     spacer2 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer2.pack()
@@ -541,8 +570,7 @@ def create_history():
     # date choice - currently just UI 
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     date.pack()
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
@@ -620,8 +648,7 @@ def create_chart():
     # date choice - currently just UI 
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     date.pack()
     spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
     spacer3.pack()
@@ -636,6 +663,8 @@ def create_chart():
 ###
 def export_data(type, name):
     df = create_table()
+    # drop signed_amount, only needed for calculations
+    df = df.drop('signed_amount', axis=1)
     file_name = name.get()
     file_dest = filedialog.askdirectory(title='Select folder to save file')
     if not file_dest:
@@ -651,9 +680,6 @@ def export_data(type, name):
         df.to_excel(file_path, index=False)
         
     reset_window()
-    selected_date.set('all time')
-    selected_label.set('Select Acounts')
-    selected_labels.set('Select Acounts')
     create_export(type)
 
 # ------------------------- export UI -------------------------
@@ -683,8 +709,7 @@ def create_export(file_type):
     # date choice - currently just UI 
     date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
     date_label.pack(pady=5)
-    date = ttk.Combobox(main_frame, textvariable=selected_date, font=('System', 18), state='readonly')
-    date['values'] = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
     date.pack()
     spacer2 = tk.Frame(main_frame, height=50, background=bg_common)
     spacer2.pack()
