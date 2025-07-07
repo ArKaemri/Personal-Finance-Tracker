@@ -24,7 +24,7 @@ relief = 'solid'
 
 # keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
 selected_label = tk.StringVar()
-selected_label.set('Select Acount')
+selected_label.set('Select Account')
 
 selected_labels = tk.StringVar()
 selected_labels.set('Select Acounts')
@@ -176,6 +176,7 @@ def save_entry(amount, text):
     with open('finance_test.txt', 'a') as file:
         file.write('\n' + output)
     # reset window
+    selected_label.set('Select acount')
     reset_window()
     create_entry()
     
@@ -221,6 +222,9 @@ def add_new_acount():
 def create_entry():
     # delete widgets on the screen
     reset_window()
+    # entry only takes 1 account, if previously more selected, reset it, otherwise - persist
+    if len(selected_label.get().split(',')) >= 2:
+        selected_label.set('Select Account')
     # label of the window
     header = tk.Label(main_frame, text='New Entry', font=('System', 28), background=bg_common, foreground=fg)
     header.pack(pady=20)
@@ -435,8 +439,11 @@ def display_table():
 ###
 def create_overview():
     reset_window()
-    selected_labels.set('Select Acounts')
-    selected_label.set('Select Acount')
+    # keep previous account choice if it is not multiple
+    if selected_label.get() != 'Select Account':
+        selected_labels.set(selected_label.get())
+    elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
+        selected_labels.set('Select Acounts')
     # label of the window
     header = tk.Label(main_frame, text='Finance Overview', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
@@ -555,6 +562,11 @@ def plot_graph():
 ###
 def create_history():
     reset_window()
+    # keep previous account choice if it is not multiple
+    if selected_label.get() != 'Select Account':
+        selected_labels.set(selected_label.get())
+    elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
+        selected_labels.set('Select Acounts')
     # label of the window
     header = tk.Label(main_frame, text='Finance History', foreground=fg, background=bg_common, font=('System', 28))
     header.pack(pady=20)
@@ -633,6 +645,10 @@ def plot_chart():
 ###
 def create_chart():
     reset_window()
+    # don't reset account choice if they correct for chart
+    # chart only takes 1 account, if previously more selected, reset it, otherwise - persist
+    if len(selected_label.get().split(',')) >= 2:
+        selected_label.set('Select Account')
     # label of the window
     header = tk.Label(main_frame, text='Earning/Spending Chart', background=bg_common, foreground=fg, font=('System', 28))
     header.pack(pady=20)
@@ -694,7 +710,6 @@ def create_export(file_type):
     elif file_type == 'xlsx':
         text_choice = 'Export to xlsx'
         button_choice = 'Save to xlsx'
-    
     reset_window()
     # label of the window
     header = tk.Label(main_frame, text=text_choice, background=bg_common, foreground=fg, font=('System', 28))
