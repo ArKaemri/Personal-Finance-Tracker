@@ -415,7 +415,7 @@ def create_table():
         elif date == '9 months':
             min_date = max_date - pd.DateOffset(months=9)
         elif date == '1 year':
-            min_date = max_date - pd.DateOffset(year=1)
+            min_date = max_date - pd.DateOffset(years=1)
         elif date == 'all time':
             return dataframe
         else:
@@ -431,16 +431,19 @@ def create_table():
     elif selected_label.get() != 'all' and selected_date.get() == 'all time':
         # filter by acounts
         filtered_df = filter_acount(df)
+        filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df       
     elif selected_label.get() == 'all' and selected_date.get() != 'all time':
         # filter by acounts
         filtered_df = filter_time(df)
+        filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df  
     else:
         filtered_df = filter_acount(df)
         filtered_df = filter_time(filtered_df)
+        filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df
     
@@ -458,8 +461,8 @@ def display_table():
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
     # config columns width
-    tree.column('date', width=70)
-    tree.column('gain/spent', width=60, anchor=tk.CENTER)
+    tree.column('date', width=40)
+    tree.column('gain/spent', width=40, anchor=tk.CENTER)
     tree.column('amount', width=100, anchor=tk.CENTER)
     tree.column('current amount', width=100, anchor=tk.CENTER)
     tree.column('purpose', anchor=tk.CENTER)
