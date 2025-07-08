@@ -6,6 +6,7 @@ import pandas as pd
 import os
 from matplotlib.figure import Figure
 from tkinter import filedialog
+import tkinter.font as tkfont
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 # ------------------------- app initialisation -------------------------
@@ -13,14 +14,19 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 window = tk.Tk(className='Expense tracker')
 
 # size of tkinter window
-w = 840
+w = 1000
 h = 800
 # common variables
-bg_common = '#626262'
-fg = 'white'
-bg_passive = '#7d7d7d'
-bg_active = '#999999'
+bg_back = "#aaaaaa"
+bg_common = "#d4d4d4"
+fg_common = 'black'
+fg_button = 'white'
+bg_button = '#85929b'
 relief = 'solid'
+
+font_header = tkfont.Font(family='DejaVu Sans', size=-28, weight='bold')
+font_label = tkfont.Font(family='DejaVu Sans', size=-20, weight='bold')
+font_text = tkfont.Font(family='DejaVu Sans', size=-16)
 
 # keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
 selected_label = tk.StringVar()
@@ -40,13 +46,15 @@ screen_h = window.winfo_screenheight()
 style = ttk.Style()
 style.theme_use('default')
 style.configure('Treeview',
-                background=bg_common,
-                fieldbackground=bg_active)
+                background = bg_common,
+                fieldbackground = bg_back,
+                font = font_text)
 style.configure('Treeview.Heading',
-                background=bg_passive,
-                foreground=fg)
+                background = bg_button,
+                foreground=fg_button,
+                font = font_text)
 style.map('Treeview.Heading',
-          background=[('active', bg_passive)])
+          background=[('active', bg_button)])
 
 # get coordinates of windows bottom left corner, to place it in middle
 ### 
@@ -71,7 +79,7 @@ window.bind('<Escape>', lambda e: close_window(e))
 
 # ------------------------- main frame -------------------------
 # create empty frame where widgets will appear
-main_frame = tk.Frame(window, background=bg_common)
+main_frame = tk.Frame(window, background=bg_back)
 # position it to whole space
 main_frame.pack(fill='both', expand='True')
 
@@ -111,7 +119,7 @@ def load_acount_single(label_var):
     top_h = 220
     # create and position window
     toplevel = tk.Toplevel(main_frame)
-    toplevel.configure(background=bg_active)
+    toplevel.configure(background=bg_back)
     top_sw = toplevel.winfo_screenwidth()
     top_hw = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -137,7 +145,7 @@ def load_acount_single(label_var):
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.SINGLE)
     listbox.pack()
     # colors
-    listbox.configure(background=bg_common, foreground=fg)
+    listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
     # select an item from list (activate immediately after click)
     listbox.bind('<<ListboxSelect>>', select_item)
     # prevent from opening more windows
@@ -187,7 +195,7 @@ def save_entry(amount, text):
 def add_new_acount():
     # create popup
     toplevel = tk.Toplevel(main_frame)
-    toplevel.configure(background=bg_passive)
+    toplevel.configure(background=bg_back)
     top_w = 200
     top_h = 140
     top_sw = toplevel.winfo_screenwidth()
@@ -196,9 +204,9 @@ def add_new_acount():
     top_y = (top_sh / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
     # add entry
-    new_label = tk.Label(toplevel, text='Input new acount', background=bg_passive, foreground=fg)
+    new_label = tk.Label(toplevel, text='Input new acount', background=bg_back, foreground=fg_button, font=font_label)
     new_label.pack(pady=10)
-    new_entry = tk.Entry(toplevel, background=bg_active)
+    new_entry = tk.Entry(toplevel, background=bg_common, foreground=fg_common, font=font_text)
     new_entry.pack(pady=10)
     # entry function
     def new_acount():
@@ -210,7 +218,7 @@ def add_new_acount():
         # close popup
         toplevel.destroy()
     # add confirm button
-    new_button = tk.Button(toplevel, text='Confirm', command=new_acount, background=bg_active, activebackground=bg_common, activeforeground=fg)
+    new_button = tk.Button(toplevel, text='Confirm', command=new_acount, background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     new_button.pack(pady=10)
     toplevel.grab_set()
 
@@ -226,38 +234,38 @@ def create_entry():
     if len(selected_label.get().split(',')) >= 2:
         selected_label.set('Select Account')
     # label of the window
-    header = tk.Label(main_frame, text='New Entry', font=('System', 28), background=bg_common, foreground=fg)
+    header = tk.Label(main_frame, text='New Entry', background=bg_back, foreground=fg_button, font=font_header)
     header.pack(pady=20)
     # spacer 
-    spacer1 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=80, background=bg_back)
     spacer1.pack()
     # acount choice, currently just UI element
-    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_back, foreground=fg_button, font=font_label)
     acounts_label.pack(pady=5)
     button_frame = tk.Frame(main_frame) # to position acount buttons in row
     button_frame.pack()
-    acounts = tk.Button(button_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts = tk.Button(button_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     acounts.pack(side=tk.LEFT, padx=0, pady=0)
-    add_acount = tk.Button(button_frame, text='+', command=add_new_acount, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    add_acount = tk.Button(button_frame, text='+', command=add_new_acount, background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     add_acount.pack(side=tk.LEFT, padx=0, pady=0)
-    spacer2 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=80, background=bg_back)
     spacer2.pack()
     # amount input field
-    amount_label = tk.Label(main_frame, text='Input amount', background=bg_common, foreground=fg, font=('System', 18))
+    amount_label = tk.Label(main_frame, text='Input amount', background=bg_back, foreground=fg_button, font=font_label)
     amount_label.pack(pady=5)
-    amount = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    amount = tk.Entry(main_frame, border=2, relief=relief, background=bg_common, foreground=fg_common, font=font_text)
     amount.pack()
-    spacer3 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer3 = tk.Frame(main_frame, height=80, background=bg_back)
     spacer3.pack()
     # source/desination input field
-    purpose_label = tk.Label(main_frame, text='Gain source / spent destination', background=bg_common, foreground=fg, font=('System', 18))
+    purpose_label = tk.Label(main_frame, text='Gain source / spent destination', background=bg_back, foreground=fg_button, font=font_label)
     purpose_label.pack(pady=5)
-    text = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    text = tk.Entry(main_frame, border=2, relief=relief, background=bg_common, foreground=fg_common, font=font_text)
     text.pack()
-    spacer4 = tk.Frame(main_frame, height=80, background=bg_common)
+    spacer4 = tk.Frame(main_frame, height=80, background=bg_back)
     spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 17))
+    button = tk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack(pady=20)
     
 # ------------------------- multi-choice acount select -------------------------
@@ -267,9 +275,9 @@ def create_entry():
 def multi_choice_acount(label_var):
     # create popup
     toplevel = tk.Toplevel(main_frame)
-    toplevel.configure(background=bg_active)
+    toplevel.configure(background=bg_back)
     top_w = 220
-    top_h = 220
+    top_h = 260
     top_sw = toplevel.winfo_screenwidth()
     top_sh = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -303,8 +311,8 @@ def multi_choice_acount(label_var):
     acount_var = tk.Variable(value=tuple(all_acounts))
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
-    listbox.configure(background=bg_common, foreground=fg)
-    button = tk.Button(toplevel, text='Confirm', command=save_selection, background=bg_passive, foreground=fg, activebackground=bg_common, activeforeground=fg)
+    listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
+    button = tk.Button(toplevel, text='Confirm', command=save_selection, background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack()
     toplevel.grab_set()
     
@@ -328,7 +336,7 @@ def choose_time(label_var):
     top_w = 220
     top_h = 220
     toplevel = tk.Toplevel(main_frame)
-    toplevel.configure(background=bg_active)
+    toplevel.configure(background=bg_back)
     top_sw = toplevel.winfo_screenwidth()
     top_hw = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -338,7 +346,7 @@ def choose_time(label_var):
     time_var = tk.Variable(value=tuple(values))
     listbox = tk.Listbox(toplevel, listvariable=time_var, selectmode=tk.SINGLE)
     listbox.pack()
-    listbox.configure(background=bg_common, foreground=fg)
+    listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
     listbox.bind('<<ListboxSelect>>', select_item)
     toplevel.grab_set()
     
@@ -430,8 +438,8 @@ def display_table():
             round(row['current_amount'], 2)
             tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['current_amount'], row['purpose']), tag='finance_row')
     tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
-    tree.tag_configure('account_row', background=bg_common, foreground=fg)
-    tree.tag_configure('finance_row', background=bg_active)
+    tree.tag_configure('account_row', background=bg_button, foreground=fg_button)
+    tree.tag_configure('finance_row', background=bg_common, foreground=fg_common)
 
 # ------------------------- overview UI -------------------------
 ###
@@ -445,26 +453,26 @@ def create_overview():
     elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
         selected_labels.set('Select Acounts')
     # label of the window
-    header = tk.Label(main_frame, text='Finance Overview', background=bg_common, foreground=fg, font=('System', 28))
+    header = tk.Label(main_frame, text='Finance Overview', background=bg_back, foreground=fg_button, font=font_header)
     header.pack(pady=20)
-    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer1.pack()
     # account choice
-    acounts_label = tk.Label(main_frame, text='Choose acounts', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acounts', background=bg_back, foreground=fg_button, font=font_label)
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     acounts.pack()
-    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer2.pack()
     # date
-    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_back, foreground=fg_button, font=font_label)
     date_label.pack(pady=5)
-    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     date.pack()
-    spacer2 = tk.Frame(main_frame, height=200, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=200, background=bg_back)
     spacer2.pack()
     # button to activate
-    button = tk.Button(main_frame, text='Show', command=display_table, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, text='Show', command=display_table, background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack(pady=20)
     
 # ------------------------- plot history graph -------------------------
@@ -475,13 +483,15 @@ def create_overview():
 ###
 def plot_graph():
     reset_window()
+    header = tk.Label(main_frame, text=f'{selected_date.get()} history', background=bg_back, foreground=fg_button, font=font_header)
+    header.pack(pady=5)
     # get values
     df = create_table()
     # create graph
     fig = Figure(figsize=(10, 6))
-    fig.set_facecolor(bg_active)
+    fig.set_facecolor(bg_back)
     ax = fig.add_subplot(111)
-    ax.set_facecolor(bg_active)
+    ax.set_facecolor(bg_common)
     scatter_plots = [] # need to store multiple accounts for hover
     for acount, group in df.groupby('acount'):
         x = group['date']
@@ -493,8 +503,8 @@ def plot_graph():
     ax.set_xlabel('Date')
     ax.set_ylabel('Amount')
     legend = ax.legend()
-    legend.get_frame().set_facecolor(bg_active)
-    legend.get_frame().set_edgecolor(fg)
+    legend.get_frame().set_facecolor(bg_common)
+    legend.get_frame().set_edgecolor(fg_common)
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     fig.autofmt_xdate()
@@ -512,7 +522,7 @@ def plot_graph():
     # when mouse is on the point get the row of location in any scatter point and display annotation
     ###
     annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder
-                        bbox = dict(boxstyle='round', fc=bg_active, edgecolor=fg), # background of annotation
+                        bbox = dict(boxstyle='round', fc=bg_common, edgecolor=fg_common), # background of annotation
                         arrowprops = dict(arrowstyle='->')) # show which point is hovered
     annot.set_visible(False)
     # update annotation
@@ -553,8 +563,6 @@ def plot_graph():
     canvas.mpl_connect('motion_notify_event', hover)
     # place toolbar
     canvas.get_tk_widget().pack()
-    # reset time variable
-    selected_date.set('this month')
 
 # ------------------------- history UI -------------------------
 ###
@@ -568,26 +576,26 @@ def create_history():
     elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
         selected_labels.set('Select Acounts')
     # label of the window
-    header = tk.Label(main_frame, text='Finance History', foreground=fg, background=bg_common, font=('System', 28))
+    header = tk.Label(main_frame, text='Finance History', foreground=fg_button, background=bg_back, font=font_header)
     header.pack(pady=20)
-    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer1.pack()
     # account choice
-    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_back, foreground=fg_button, font=font_label)
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts = tk.Button(main_frame, width=12,textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     acounts.pack()
-    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer2.pack()
     # date choice - currently just UI 
-    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_back, foreground=fg_button, font=font_label)
     date_label.pack(pady=5)
-    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     date.pack()
-    spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
+    spacer3 = tk.Frame(main_frame, height=200, background=bg_back)
     spacer3.pack()
     # button to activate
-    button = tk.Button(main_frame, command=plot_graph, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=plot_graph, text='Plot', background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack(pady=20)
     
 # ------------------------- pie chart plot -------------------------
@@ -599,8 +607,8 @@ def plot_chart():
     reset_window()
     df = create_table()
     # label of what acount chosen
-    label = tk.Label(main_frame, text=f'{selected_label.get()} earning/spending', background=bg_common, foreground=fg, font=('System', 18))
-    label.pack(pady=5)
+    header = tk.Label(main_frame, text=f'{selected_label.get()} earning/spending', background=bg_back, foreground=fg_button, font=font_header)
+    header.pack(pady=5)
     # find total spending/earning
     total_earning = df[df['symbol'] == '+']['amount'].sum()
     total_spending = df[df['symbol'] == '-']['amount'].sum()
@@ -609,30 +617,30 @@ def plot_chart():
     frame1 = tk.Frame(main_frame)
     frame1.pack(side='left', padx=10)
     # label with total
-    label1 = tk.Label(frame1, text=f'Earning chart (Total: {total_earning:.2f})', background=bg_active)
+    label1 = tk.Label(frame1, text=f'Earning chart (Total: {total_earning:.2f})', background=bg_button, foreground=fg_button, font=font_label)
     label1.pack(fill='x')
     # purposes and their % from total  
     percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
     # figure
     fig1 = Figure(figsize=(4, 4))
-    fig1.set_facecolor(bg_passive)
+    fig1.set_facecolor(bg_common)
     ax1 = fig1.add_subplot(111)
     _, purposes1, _ = ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
     # spending pie
     frame2 = tk.Frame(main_frame)
     frame2.pack(side='right', padx=10)
-    label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})', background=bg_active)
+    label2 = tk.Label(frame2, text=f'Spending chart (Total: -{total_spending:.2f})', background=bg_button, foreground=fg_button, font=font_label)
     label2.pack(fill='x')
     percent2 = df[df['symbol'] == '-'].groupby('purpose')['amount'].sum()
     fig2 = Figure(figsize=(4, 4))
-    fig2.set_facecolor(bg_passive)
+    fig2.set_facecolor(bg_common)
     ax2 = fig2.add_subplot(111)
     _, purposes2, _ = ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
     # color labels white
     for p in purposes1:
-        p.set_color(fg)
+        p.set_color(fg_common)
     for p in purposes2:
-        p.set_color(fg)
+        p.set_color(fg_common)
     # finalise
     canvas1 = FigureCanvasTkAgg(fig1, master=frame1)
     canvas2 = FigureCanvasTkAgg(fig2, master=frame2)
@@ -650,26 +658,26 @@ def create_chart():
     if len(selected_label.get().split(',')) >= 2:
         selected_label.set('Select Account')
     # label of the window
-    header = tk.Label(main_frame, text='Earning/Spending Chart', background=bg_common, foreground=fg, font=('System', 28))
+    header = tk.Label(main_frame, text='Earning/Spending Chart', background=bg_back, foreground=fg_button, font=font_header)
     header.pack(pady=20)
-    spacer1 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer1.pack()
     # account choice
-    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_back, foreground=fg_button, font=font_label)
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_label, command=lambda: load_acount_single(selected_label), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     acounts.pack()
-    spacer2 = tk.Frame(main_frame, height=100, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=100, background=bg_back)
     spacer2.pack()
     # date choice - currently just UI 
-    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_back, foreground=fg_button, font=font_label)
     date_label.pack(pady=5)
-    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     date.pack()
-    spacer3 = tk.Frame(main_frame, height=200, background=bg_common)
+    spacer3 = tk.Frame(main_frame, height=200, background=bg_back)
     spacer3.pack()
     # button to activate
-    button = tk.Button(main_frame, command=plot_chart, text='Plot', background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=plot_chart, text='Plot', background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack(pady=20)
 
 # ------------------------- export UI -------------------------
@@ -712,33 +720,33 @@ def create_export(file_type):
         button_choice = 'Save to xlsx'
     reset_window()
     # label of the window
-    header = tk.Label(main_frame, text=text_choice, background=bg_common, foreground=fg, font=('System', 28))
+    header = tk.Label(main_frame, text=text_choice, background=bg_back, foreground=fg_button, font=font_header)
     header.pack(pady=50)
     # acount choice, currently just UI element
-    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_common, foreground=fg, font=('System', 18))
+    acounts_label = tk.Label(main_frame, text='Choose acount', background=bg_back, foreground=fg_button, font=font_label)
     acounts_label.pack(pady=5)
-    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    acounts = tk.Button(main_frame, width=12, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     acounts.pack()
-    spacer1 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer1 = tk.Frame(main_frame, height=50, background=bg_back)
     spacer1.pack()
     # date choice - currently just UI 
-    date_label = tk.Label(main_frame, text='Choose time period', background=bg_common, foreground=fg, font=('System', 18))
+    date_label = tk.Label(main_frame, text='Choose time period', background=bg_back, foreground=fg_button, font=font_label)
     date_label.pack(pady=5)
-    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    date = tk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     date.pack()
-    spacer2 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer2 = tk.Frame(main_frame, height=50, background=bg_back)
     spacer2.pack()
     # file name input field
-    name_label = tk.Label(main_frame, text='Name the file', background=bg_common, foreground=fg, font=('System', 18))
+    name_label = tk.Label(main_frame, text='Name the file', background=bg_back, foreground=fg_button, font=font_label)
     name_label.pack(pady=5)
-    name = tk.Entry(main_frame, border=2, relief=relief, background=bg_passive, foreground=fg, font=('System', 18))
+    name = tk.Entry(main_frame, border=2, background=bg_common, foreground=fg_common, font=font_text)
     name.pack()
-    spacer3 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer3 = tk.Frame(main_frame, height=50, background=bg_back)
     spacer3.pack()
-    spacer4 = tk.Frame(main_frame, height=50, background=bg_common)
+    spacer4 = tk.Frame(main_frame, height=50, background=bg_back)
     spacer4.pack()
     # activation button - save to txt file
-    button = tk.Button(main_frame, command=lambda: export_data(file_type, name), text=button_choice, background=bg_passive, foreground=fg, activebackground=bg_active, activeforeground=fg, font=('System', 18))
+    button = tk.Button(main_frame, command=lambda: export_data(file_type, name), text=button_choice, background=bg_button, foreground=fg_button, activebackground=bg_common, activeforeground=fg_common, font=font_text)
     button.pack(pady=20)
 
 # ------------------------- create menu -------------------------
