@@ -32,6 +32,7 @@ bg_common = "#d4d4d4"
 fg_common = 'black'
 fg_button = 'white'
 bg_button = '#85929b'
+bg_selected = "#777777"
 
 font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold')
 font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold')
@@ -56,6 +57,10 @@ style.configure('Treeview.Heading',
                 font = font_text)
 style.map('Treeview.Heading',
           background=[('active', bg_button)])
+# change selected component color
+style.map('Treeview',
+          background=[('selected', bg_selected)],
+          foreground=[('selected', fg_button)])
 # entry
 style.configure('TEntry',
                 fieldbackground = bg_common,
@@ -70,6 +75,8 @@ style.configure('TButton',
 style.map('TButton',
           background = [('active', bg_common)],
           foreground = [('active', fg_common)])
+# disable dotted line when button pressed
+window.option_add('*TButton*takeFocus', 0)
 # label
 style.configure('field.TLabel',
                 background = bg_back,
@@ -351,7 +358,7 @@ def multi_choice_acount(label_var):
     acount_var = tk.Variable(value=tuple(all_acounts))
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
-    listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
+    listbox.configure(background=bg_common, foreground=fg_common, font=font_text, selectbackground=bg_selected, selectforeground=fg_button)
     button = ttk.Button(toplevel, text='Confirm', command=save_selection, width=15)
     button.pack(pady=10)
     toplevel.grab_set()
@@ -427,6 +434,8 @@ def create_table():
     df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum().apply(lambda x: round(x, 2))
     # get acount list for filter
     if selected_label.get() == 'all' and selected_date.get() == 'all time':
+        df = df.copy()
+        df['date'] = df['date'].dt.date
         return df
     elif selected_label.get() != 'all' and selected_date.get() == 'all time':
         # filter by acounts
@@ -461,12 +470,12 @@ def display_table():
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
     # config columns width
-    tree.column('#0', width=140)
-    tree.column('date', width=40)
+    tree.column('#0', width=170)
+    tree.column('date', width=45)
     tree.column('gain/spent', width=40, anchor=tk.CENTER)
-    tree.column('amount', width=80, anchor=tk.CENTER)
+    tree.column('amount', width=65, anchor=tk.CENTER)
     tree.column('current amount', width=100, anchor=tk.CENTER)
-    tree.column('purpose', anchor=tk.CENTER)
+    tree.column('purpose', width=310, anchor=tk.CENTER)
     # populate treeview grouped by acount
     df = create_table()
     # group by acount
@@ -804,7 +813,7 @@ def create_menu():
     window.config(menu=menu)
 
     # create submenu (seperate options that will have choices after clicked)
-    file_menu = tk.Menu(menu)
+    file_menu = tk.Menu(menu, tearoff=0)
     # name it and add to the main menu
     menu.add_cascade(label='Window', menu=file_menu)
     # add seperate choices
@@ -814,20 +823,20 @@ def create_menu():
     file_menu.add_command(label='Chart', command=create_chart)
 
     # repeat with second submenu
-    export_menu = tk.Menu(menu)
+    export_menu = tk.Menu(menu, tearoff=0)
     menu.add_cascade(label='Export', menu=export_menu)
     export_menu.add_command(label='To CSV', command=lambda: create_export('csv'))
     export_menu.add_command(label='To xlsx', command=lambda: create_export('xlsx'))
 
     # repeat with third submenu
-    help_menu = tk.Menu(menu)
-    menu.add_cascade(label='Help', menu=help_menu)
-    help_menu.add_command(label='Files')
-    help_menu.add_command(label='New entry')
-    help_menu.add_command(label='Overview')
-    help_menu.add_command(label='History')
-    help_menu.add_command(label='Chart')
-    help_menu.add_command(label='Export')
+    # help_menu = tk.Menu(menu)
+    # menu.add_cascade(label='Help', menu=help_menu)
+    # help_menu.add_command(label='Files')
+    # help_menu.add_command(label='New entry')
+    # help_menu.add_command(label='Overview')
+    # help_menu.add_command(label='History')
+    # help_menu.add_command(label='Chart')
+    # help_menu.add_command(label='Export')
 
 # ------------------------- initiate the app -------------------------
 # call starting window to have content
