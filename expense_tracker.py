@@ -449,7 +449,7 @@ def create_table():
     
 # display table in window
 def display_table():
-    reset_window(1000, 800)
+    reset_window(1100, 800)
     # create widget
     tree = ttk.Treeview(main_frame)
     tree['columns'] = ('date', 'gain/spent', 'amount', 'current amount', 'purpose')
@@ -461,9 +461,10 @@ def display_table():
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
     # config columns width
+    tree.column('#0', width=140)
     tree.column('date', width=40)
     tree.column('gain/spent', width=40, anchor=tk.CENTER)
-    tree.column('amount', width=100, anchor=tk.CENTER)
+    tree.column('amount', width=80, anchor=tk.CENTER)
     tree.column('current amount', width=100, anchor=tk.CENTER)
     tree.column('purpose', anchor=tk.CENTER)
     # populate treeview grouped by acount
@@ -647,7 +648,7 @@ def create_history():
 # calculate total spending/earning and plot how much of total % is each reason (where spent/earnt the money)
 ###
 def plot_chart():
-    reset_window(840, 600)
+    reset_window(740, 800)
     df = create_table()
     # label of what acount chosen
     header = ttk.Label(main_frame, text=f'{selected_label.get()} earning/spending', style='header.TLabel')
@@ -658,24 +659,26 @@ def plot_chart():
     # earning pie 
     # frame for 1 chart
     frame1 = ttk.Frame(main_frame)
-    frame1.pack(side='left', padx=10)
+    # frame1.pack(side='left', padx=10)
+    frame1.pack(pady=15)
     # label with total
     label1 = ttk.Label(frame1, text=f'Earnings (Total: {total_earning:.2f})', style='chart.TLabel', foreground='#31ffd2')
     label1.pack(fill='x')
     # purposes and their % from total  
     percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
     # figure
-    fig1 = Figure(figsize=(4, 4))
+    fig1 = Figure(figsize=(7, 3))
     fig1.set_facecolor(bg_common)
     ax1 = fig1.add_subplot(111)
     _, purposes1, _ = ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
     # spending pie
     frame2 = tk.Frame(main_frame)
-    frame2.pack(side='right', padx=10)
-    label2 = ttk.Label(frame2, text=f'Spendings (Total: -{total_spending:.2f})', style='chart.TLabel', foreground="#ff7e8f")
+    # frame2.pack(side='right', padx=10)
+    frame2.pack(pady=15)
+    label2 = ttk.Label(frame2, text=f'Spendings (Total: -{total_spending:.2f})', style='chart.TLabel', foreground="#ffa1a1")
     label2.pack(fill='x')
     percent2 = df[df['symbol'] == '-'].groupby('purpose')['amount'].sum()
-    fig2 = Figure(figsize=(4, 4))
+    fig2 = Figure(figsize=(7, 3))
     fig2.set_facecolor(bg_common)
     ax2 = fig2.add_subplot(111)
     _, purposes2, _ = ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
