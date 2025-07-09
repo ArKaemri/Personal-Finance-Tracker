@@ -38,6 +38,7 @@ font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold')
 font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold')
 font_text = tkfont.Font(family='DejaVu Sans', size=-16)
 font_entry = tkfont.Font(family='DejaVu Sans', size=-16, weight='bold')
+font_error = tkfont.Font(family='DejaVu Sans', size=-12, weight='bold')
 
 style = ttk.Style()
 style.theme_use('default')
@@ -245,7 +246,7 @@ def add_new_acount():
     # create popup
     toplevel = tk.Toplevel(main_frame)
     toplevel.configure(background=bg_back)
-    top_w = 200
+    top_w = 220
     top_h = 200
     top_sw = toplevel.winfo_screenwidth()
     top_sh = toplevel.winfo_screenheight()
@@ -256,11 +257,25 @@ def add_new_acount():
     new_label = ttk.Label(toplevel, text='Input new account', style='field.TLabel')
     new_label.pack(pady=15)
     new_entry = ttk.Entry(toplevel, font=font_entry)
-    new_entry.pack(pady=15)
+    new_entry.pack(pady=5)
+    error_msg = ttk.Label(toplevel, text='', font=font_error, foreground="#ffb5b5", background=bg_back)
+    error_msg.pack()
     # entry function
     def new_acount():
         # get variable from entry
         acount = new_entry.get()
+        # if input empty, show error
+        if acount == '':
+            error_msg.config(text='Input field cannot be empty', background=bg_button)
+            return
+        # if variable exist in file, show error
+        with open('acounts_test.txt', 'r') as file:
+            content = file.readlines()
+            for line in content:
+                line = line.strip().split('-')[0]
+                if acount == line:
+                    error_msg.config(text='Such account already exists', background=bg_button)
+                    return
         # write to file
         with open('acounts_test.txt', 'a') as file:
             file.write('\n' + acount + '-live')
@@ -268,7 +283,7 @@ def add_new_acount():
         toplevel.destroy()
     # add confirm button
     new_button = ttk.Button(toplevel, text='Confirm', command=new_acount, style='TButton', width=15)
-    new_button.pack(pady=15)
+    new_button.pack(pady=20)
     toplevel.grab_set()
 
 # ------------------------- entry UI -------------------------
