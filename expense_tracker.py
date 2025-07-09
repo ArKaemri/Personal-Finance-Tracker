@@ -517,7 +517,7 @@ def create_overview():
     spacer2.pack()
     # button to activate
     button = ttk.Button(main_frame, text='Show', command=display_table, width=15)
-    button.pack(pady=20)
+    button.pack(pady=30)
     
 # ------------------------- plot history graph -------------------------
 ###
@@ -526,13 +526,13 @@ def create_overview():
 # example: 2025-02-16 +30.00, 2025-02-17 - 20.00 -> 2025-02-16 = 30.00, 2025-02-17 = 10.00
 ###
 def plot_graph():
-    reset_window(1000, 800)
+    reset_window(900, 760)
     header = ttk.Label(main_frame, text=f'{selected_date.get()} history', style='header.TLabel')
-    header.pack(pady=15)
+    header.pack(pady=30)
     # get values
     df = create_table()
     # create graph
-    fig = Figure(figsize=(10, 6))
+    fig = Figure(figsize=(9, 6))
     fig.set_facecolor(bg_back)
     ax = fig.add_subplot(111)
     ax.set_facecolor(bg_common)
@@ -640,7 +640,7 @@ def create_history():
     spacer3.pack()
     # button to activate
     button = ttk.Button(main_frame, command=plot_graph, text='Plot', width=15)
-    button.pack(pady=20)
+    button.pack(pady=30)
     
 # ------------------------- pie chart plot -------------------------
 ###
@@ -724,7 +724,7 @@ def create_chart():
     spacer3.pack()
     # button to activate
     button = ttk.Button(main_frame, command=plot_chart, text='Plot', width=15)
-    button.pack(pady=20)
+    button.pack(pady=30)
 
 # ------------------------- export UI -------------------------
 ###
@@ -791,7 +791,7 @@ def create_export(file_type):
     spacer3.pack()
     # activation button - save to txt file
     button = ttk.Button(main_frame, command=lambda: export_data(file_type, name), text=button_choice, width=15)
-    button.pack(pady=10)
+    button.pack(pady=11)
 
 # ------------------------- create menu -------------------------
 ###
