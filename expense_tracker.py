@@ -149,7 +149,10 @@ def reset_window(width=600, height=600):
 # read acount txt file and split them in acount and class (account1-live \n acount2-live -> {'live':[acount1, acount2]})
 # put acounts in the listbox and activate script (saving selection) after clicking on acount + close the popup
 ###
-def load_acount_single(label_var):
+def load_acount_single(label_var, err):
+    # reload error message
+    if selected_label.get() != 'Selected Account':
+        err.config(text='', background=bg_back)
     # function to select item from listbox
     def select_item(event):
         # get the widget
@@ -339,7 +342,7 @@ def create_entry():
     button_frame.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
-    acounts = ttk.Button(button_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), width=15)
+    acounts = ttk.Button(button_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label, error_acount), width=15)
     acounts.pack(side=tk.LEFT, padx=0, pady=0)
     add_acount = ttk.Button(button_frame, text='+', command=add_new_acount, width=4)
     add_acount.pack(side=tk.LEFT, padx=0, pady=0)
@@ -372,7 +375,9 @@ def create_entry():
 ###
 # same as load_acount_single, but choose acounts on button press (not on mouse click) and can choose multiple choices
 ###
-def multi_choice_acount(label_var):
+def multi_choice_acount(label_var, err):
+    if selected_labels.get() != 'Select Accounts':
+        err.config(text='', background=bg_back)
     # create popup
     toplevel = tk.Toplevel(main_frame)
     toplevel.configure(background=bg_back)
@@ -576,7 +581,7 @@ def create_overview():
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acounts', style='field.TLabel')
     acounts_label.pack(pady=10)
-    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
+    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels, error_acount))
     acounts.pack()
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
@@ -706,7 +711,7 @@ def create_history():
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
-    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
+    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels, error_acount))
     acounts.pack()
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
@@ -728,7 +733,12 @@ def create_history():
 # display 2 pie charts for 1 acount, 1-st for spending, 2-nd for earning
 # calculate total spending/earning and plot how much of total % is each reason (where spent/earnt the money)
 ###
-def plot_chart():
+def plot_chart(err_acc):
+    if selected_label.get() == 'Select Account':
+        err_acc.config(text='Account need to be selected', background=bg_button)
+        return
+    else: 
+        err_acc.config(text='', background=bg_back)
     reset_window(740, 800)
     df = create_table()
     # label of what acount chosen
@@ -792,9 +802,11 @@ def create_chart():
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
-    acounts = ttk.Button(main_frame, width=15, textvariable=selected_label, command=lambda: load_acount_single(selected_label))
-    acounts.pack()
-    spacer2 = ttk.Frame(main_frame, height=60)
+    acounts = ttk.Button(main_frame, width=15, textvariable=selected_label, command=lambda: load_acount_single(selected_label, error_acount))
+    acounts.pack(pady=5)
+    error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
+    spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
@@ -804,7 +816,7 @@ def create_chart():
     spacer3 = ttk.Frame(main_frame, height=100)
     spacer3.pack()
     # button to activate
-    button = ttk.Button(main_frame, command=plot_chart, text='Plot', width=15)
+    button = ttk.Button(main_frame, command=lambda: plot_chart(error_acount), text='Plot', width=15)
     button.pack(pady=30)
 
 # ------------------------- export UI -------------------------
@@ -863,7 +875,7 @@ def create_export(file_type):
     # acount choice, currently just UI element
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
-    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
+    acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels, error_acount))
     acounts.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
