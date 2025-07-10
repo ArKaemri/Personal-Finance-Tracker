@@ -226,12 +226,6 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
         return
     else:
         er_acount.config(text='', background=bg_back)
-    # check if purpose not empty
-    if text == '':
-        er_text.config(text='Must input source/destination (up to 30 characters)', background=bg_button)
-        return
-    else:
-        er_text.config(text='', background=bg_back)
     # check if amount is not empty
     if amount_text == '':
         er_amount.config(text='Must input amount (format: +00 OR 00.00 OR -00.0)', background=bg_button)
@@ -244,6 +238,18 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
         return
     else:
         er_amount.config(text='', background=bg_back)
+    # check if purpose not empty
+    if text == '':
+        er_text.config(text='Must input source/destination (30 characters or less)', background=bg_button)
+        return
+    else:
+        er_text.config(text='', background=bg_back)
+    # check if purpose is not longer than 30 characters
+    if len(text) >= 31:
+        er_text.config(text='Text should be 30 characters or less', background=bg_button)
+        return
+    else:
+        er_text.config(text='', background=bg_back)
     # add gain/spent variable depending on symbol +/-/nothing
     if amount_text.startswith('-'):
         state = '-'
