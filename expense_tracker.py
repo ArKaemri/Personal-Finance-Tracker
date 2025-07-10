@@ -234,7 +234,13 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
         er_text.config(text='', background=bg_back)
     # check if amount is not empty
     if amount_text == '':
-        er_amount.config(text='Must input amount (format: 00 OR 00.00 OR -00.0)', background=bg_button)
+        er_amount.config(text='Must input amount (format: +00 OR 00.00 OR -00.0)', background=bg_button)
+        return
+    else:
+        er_amount.config(text='', background=bg_back)
+    # check if amount is numeric
+    if not re.match(r'^[+-]?\d+(\.\d{1,2})?$', amount_text):
+        er_amount.config(text='Input should be in format: +00 OR 00.00 OR -00.0', background=bg_button)
         return
     else:
         er_amount.config(text='', background=bg_back)
