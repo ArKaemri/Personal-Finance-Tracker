@@ -388,6 +388,37 @@ def multi_choice_acount(label_var, err):
     top_x = (top_sw / 2) - (top_w / 2)
     top_y = (top_sh / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    # deselect all/other
+    ###
+    # follow user selected accounts to prevent choosing 'all' when other selections are made and opposite
+    # if 'all' is selected after other selections are made, deselect selection except 'all'
+    # if any selection is made after 'all' is selected, deselect 'all'
+    # check the logic after button release, to show how selections are changed live
+    ###
+    def check_for_all(event):
+        clicked_index = listbox.nearest(event.y)
+        clicked_item = listbox.get(clicked_index)
+        selected = listbox.curselection()
+        selected_acounts = [listbox.get(i) for i in selected]
+        # all check, if current click is 'all'
+        if clicked_item == 'all':
+            # if 'all' selected alongside other selections
+            for i in range(len(all_acounts)):
+                # if first element is not 'all', means it is selected last
+                if listbox.get(i) != 'all':
+                    # clear anything but 'all'
+                    listbox.selection_clear(i)
+            # update selection (checks after each click)
+            listbox.selection_set(clicked_index)
+        # if all is selected before
+        else:
+            # all was selected, but not current selection
+            if 'all' in selected_acounts:
+                for i in range(len(all_acounts)):
+                    # if first element is all
+                    if listbox.get(i) == 'all':
+                        # deselect all, only keep other
+                        listbox.selection_clear(i)
     # save selected acounts
     def save_selection():
         # gather selected acounts
@@ -420,6 +451,7 @@ def multi_choice_acount(label_var, err):
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
     listbox.configure(background=bg_common, foreground=fg_common, font=font_text, selectbackground=bg_selected, selectforeground=fg_button)
+    listbox.bind('<ButtonRelease-1>', check_for_all) # 'all' selection check
     error_acount = ttk.Label(toplevel, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
     button = ttk.Button(toplevel, text='Confirm', command=save_selection, width=15)
