@@ -793,14 +793,25 @@ def create_chart():
 # export whole data (with cumulative + current amounts) into .csv or .xlsx formats
 # take file name and path, pass to to_excel or to_csv functions
 ###
-def export_data(type, name):
+def export_data(type, name, er_acc, er_name):
     df = create_table()
     # drop signed_amount, only needed for calculations
     df = df.drop('signed_amount', axis=1)
     file_name = name.get()
+    # check empty
+    if selected_label.get() == 'Select Account':
+        er_acc.config(text='Must select account[s]', background=bg_button)
+        return
+    else:
+        er_acc.config(text='', background=bg_back)
+    if file_name == '':
+        er_name.config(text='Must input name', background=bg_button)
+        return
+    else:
+        er_name.config(text='', background=bg_back)
+    
     file_dest = filedialog.askdirectory(title='Select folder to save file')
     if not file_dest:
-        print('no folder selected')
         return
     os.makedirs(file_dest, exist_ok=True)
     file_path = os.path.join(file_dest, f'{file_name}.{type}')
@@ -829,30 +840,34 @@ def create_export(file_type):
     reset_window()
     # label of the window
     header = ttk.Label(main_frame, text=text_choice, style='header.TLabel')
-    header.pack(pady=40)
+    header.pack(pady=30)
     # acount choice, currently just UI element
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
     acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
-    acounts.pack()
-    spacer1 = ttk.Frame(main_frame, height=40)
+    acounts.pack(pady=5)
+    error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
+    spacer1 = ttk.Frame(main_frame, height=30)
     spacer1.pack()
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
     date_label.pack(pady=10)
     date = ttk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), width=15)
     date.pack()
-    spacer2 = ttk.Frame(main_frame, height=40)
+    spacer2 = ttk.Frame(main_frame, height=30)
     spacer2.pack()
     # file name input field
     name_label = ttk.Label(main_frame, text='Name the file', style='field.TLabel')
     name_label.pack(pady=10)
     name = ttk.Entry(main_frame, font=font_entry)
     name.pack()
-    spacer3 = ttk.Frame(main_frame, height=40)
+    error_name = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_name.pack()
+    spacer3 = ttk.Frame(main_frame, height=30)
     spacer3.pack()
     # activation button - save to txt file
-    button = ttk.Button(main_frame, command=lambda: export_data(file_type, name), text=button_choice, width=15)
+    button = ttk.Button(main_frame, command=lambda: export_data(file_type, name, error_acount, error_name), text=button_choice, width=15)
     button.pack(pady=11)
 
 # ------------------------- create menu -------------------------
