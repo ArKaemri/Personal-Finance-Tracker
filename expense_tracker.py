@@ -330,7 +330,7 @@ def create_entry():
     # delete widgets on the screen
     reset_window()
     # entry only takes 1 account, if previously more selected, reset it, otherwise - persist
-    if len(selected_label.get().split(',')) >= 2:
+    if len(selected_label.get().split(',')) >= 2 or selected_label.get() == 'all':
         selected_label.set('Select Account')
     # label of the window
     header = ttk.Label(main_frame, text='New Entry', style='header.TLabel')
@@ -792,7 +792,7 @@ def create_chart():
     reset_window()
     # don't reset account choice if they correct for chart
     # chart only takes 1 account, if previously more selected, reset it, otherwise - persist
-    if len(selected_label.get().split(',')) >= 2:
+    if len(selected_label.get().split(',')) >= 2 or selected_label.get() == 'all':
         selected_label.set('Select Account')
     # label of the window
     header = ttk.Label(main_frame, text='Earning/Spending Chart', style='header.TLabel')
@@ -861,6 +861,8 @@ def export_data(type, name, er_acc, er_name):
 # create and display widgets for export window (export finance.txt as .csv or .xlsx)
 ###
 def create_export(file_type):
+    if selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
+        selected_labels.set('Select Acounts')
     # choose text based on menu selection
     if file_type == 'csv':
         text_choice = 'Export to CSV'
