@@ -2,6 +2,7 @@
 import datetime
 import pandas as pd
 import os
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -18,7 +19,7 @@ selected_label = tk.StringVar()
 selected_label.set('Select Account')
 
 selected_labels = tk.StringVar()
-selected_labels.set('Select Acounts')
+selected_labels.set('Select Accounts')
 
 selected_date = tk.StringVar()
 selected_date.set('all time')
@@ -33,6 +34,7 @@ fg_common = 'black'
 fg_button = 'white'
 bg_button = '#85929b'
 bg_selected = "#777777"
+error = '#ffb5b5'
 
 font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold')
 font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold')
@@ -208,7 +210,7 @@ def load_acount_single(label_var):
 #                     purpose (text to lowercase to not acidentaly make 2 seperate purposes Gift and gift - same, but code will think different)
 # add inputs to txt, then reset window and replace widgets with empty ones
 ###
-def save_entry(amount, text):
+def save_entry(amount, text, er_amount, er_text, er_acount):
     # get selected acount
     acount = selected_label.get()
     # get and lowercase text
@@ -218,6 +220,24 @@ def save_entry(amount, text):
     # get the direction (spent or gain money)
     # get amount in text form without spaces - '- 20', '-20', ' - 20' -> '-20' (prevent problems from different input)
     amount_text = amount.get().strip()
+    # check if acount is chosen
+    if acount == 'Select Account':
+        er_acount.config(text='Must select account', background=bg_button)
+        return
+    else:
+        er_acount.config(text='', background=bg_back)
+    # check if purpose not empty
+    if text == '':
+        er_text.config(text='Must input source/destination (up to 30 characters)', background=bg_button)
+        return
+    else:
+        er_text.config(text='', background=bg_back)
+    # check if amount is not empty
+    if amount_text == '':
+        er_amount.config(text='Must input amount (format: 00 OR 00.00 OR -00.0)', background=bg_button)
+        return
+    else:
+        er_amount.config(text='', background=bg_back)
     # add gain/spent variable depending on symbol +/-/nothing
     if amount_text.startswith('-'):
         state = '-'
@@ -234,7 +254,7 @@ def save_entry(amount, text):
     with open('finance_test.txt', 'a') as file:
         file.write('\n' + output)
     # reset window
-    selected_label.set('Select acount')
+    selected_label.set('Select Account')
     reset_window()
     create_entry()
     
@@ -258,7 +278,7 @@ def add_new_acount():
     new_label.pack(pady=15)
     new_entry = ttk.Entry(toplevel, font=font_entry)
     new_entry.pack(pady=5)
-    error_msg = ttk.Label(toplevel, text='', font=font_error, foreground="#ffb5b5", background=bg_back)
+    error_msg = ttk.Label(toplevel, text='', font=font_error, foreground=error, background=bg_back)
     error_msg.pack()
     # entry function
     def new_acount():
@@ -299,35 +319,41 @@ def create_entry():
         selected_label.set('Select Account')
     # label of the window
     header = ttk.Label(main_frame, text='New Entry', style='header.TLabel')
-    header.pack(pady=40)
+    header.pack(pady=30)
     # acount choice, currently just UI element
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
     button_frame = ttk.Frame(main_frame) # to position acount buttons in row
-    button_frame.pack()
+    button_frame.pack(pady=5)
+    error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
     acounts = ttk.Button(button_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label), width=15)
     acounts.pack(side=tk.LEFT, padx=0, pady=0)
     add_acount = ttk.Button(button_frame, text='+', command=add_new_acount, width=4)
     add_acount.pack(side=tk.LEFT, padx=0, pady=0)
     # spacer to put gap between widgets
-    spacer1 = ttk.Frame(main_frame, height=40)
+    spacer1 = ttk.Frame(main_frame, height=30)
     spacer1.pack()
     # amount input field
     amount_label = ttk.Label(main_frame, text='Input amount', style='field.TLabel')
     amount_label.pack(pady=10)
     amount = ttk.Entry(main_frame, font=font_entry)
-    amount.pack()
-    spacer2 = ttk.Frame(main_frame, height=40)
+    amount.pack(pady=5)
+    error_amount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_amount.pack()
+    spacer2 = ttk.Frame(main_frame, height=30)
     spacer2.pack()
     # source/desination input field
     purpose_label = ttk.Label(main_frame, text='Gain source / spent destination', style='field.TLabel')
     purpose_label.pack(pady=10)
     text = ttk.Entry(main_frame, font=font_entry)
-    text.pack()
-    spacer3 = ttk.Frame(main_frame, height=40)
+    text.pack(pady=5)
+    error_text = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_text.pack()
+    spacer3 = ttk.Frame(main_frame, height=20)
     spacer3.pack()
     # activation button - save to txt file
-    button = ttk.Button(main_frame, command=lambda: save_entry(amount, text), text='Save', width=15)
+    button = ttk.Button(main_frame, command=lambda: save_entry(amount, text, error_amount, error_text, error_acount), text='Save', width=15)
     button.pack(pady=20)
     
 # ------------------------- multi-choice acount select -------------------------
