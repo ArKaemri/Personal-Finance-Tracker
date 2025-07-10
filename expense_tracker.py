@@ -133,11 +133,7 @@ main_frame.pack(fill='both', expand='True')
 def reset_window(width=600, height=600):
     w = width
     h = height
-    screen_w = window.winfo_screenwidth()
-    screen_h = window.winfo_screenheight()
-    x = (screen_w / 2) - (w / 2)
-    y = (screen_h / 2) - (h / 2)
-    window.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    window.geometry('%dx%d' % (w, h))
     for widget in main_frame.winfo_children():
         widget.destroy()
 
@@ -365,11 +361,11 @@ def create_entry():
     text.pack(pady=5)
     error_text = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_text.pack()
-    spacer3 = ttk.Frame(main_frame, height=20)
+    spacer3 = ttk.Frame(main_frame, height=21)
     spacer3.pack()
     # activation button - save to txt file
     button = ttk.Button(main_frame, command=lambda: save_entry(amount, text, error_amount, error_text, error_acount), text='Save', width=15)
-    button.pack(pady=20)
+    button.pack(pady=15)
     
 # ------------------------- multi-choice acount select -------------------------
 ###
@@ -614,10 +610,10 @@ def create_overview():
     acounts_label = ttk.Label(main_frame, text='Choose acounts', style='field.TLabel')
     acounts_label.pack(pady=10)
     acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels, error_acount))
-    acounts.pack()
+    acounts.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
-    spacer2 = ttk.Frame(main_frame, height=60)
+    spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
     # date
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
@@ -744,10 +740,10 @@ def create_history():
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
     acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels, error_acount))
-    acounts.pack()
+    acounts.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
-    spacer2 = ttk.Frame(main_frame, height=60)
+    spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
@@ -913,27 +909,27 @@ def create_export(file_type):
     acounts.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
-    spacer1 = ttk.Frame(main_frame, height=30)
+    spacer1 = ttk.Frame(main_frame, height=25)
     spacer1.pack()
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
-    date_label.pack(pady=10)
+    date_label.pack(pady=15)
     date = ttk.Button(main_frame, textvariable=selected_date, command=lambda: choose_time(selected_date), width=15)
     date.pack()
-    spacer2 = ttk.Frame(main_frame, height=30)
+    spacer2 = ttk.Frame(main_frame, height=29)
     spacer2.pack()
     # file name input field
     name_label = ttk.Label(main_frame, text='Name the file', style='field.TLabel')
-    name_label.pack(pady=10)
+    name_label.pack(pady=15)
     name = ttk.Entry(main_frame, font=font_entry)
-    name.pack()
+    name.pack(pady=5)
     error_name = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_name.pack()
-    spacer3 = ttk.Frame(main_frame, height=30)
+    spacer3 = ttk.Frame(main_frame, height=20)
     spacer3.pack()
     # activation button - save to txt file
     button = ttk.Button(main_frame, command=lambda: export_data(file_type, name, error_acount, error_name), text=button_choice, width=15)
-    button.pack(pady=11)
+    button.pack(pady=20)
 
 # ------------------------- create menu -------------------------
 ###
