@@ -515,7 +515,12 @@ def create_table():
         return filtered_df
     
 # display table in window
-def display_table():
+def display_table(err_acc):
+    if selected_label.get() == 'Select Account':
+        err_acc.config(text='Must select account[s]', background=bg_button)
+        return
+    else:
+        err_acc.config(text='', background=bg_back)
     reset_window(1100, 800)
     # create widget
     tree = ttk.Treeview(main_frame)
@@ -573,6 +578,8 @@ def create_overview():
     acounts_label.pack(pady=10)
     acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
     acounts.pack()
+    error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
     spacer2 = ttk.Frame(main_frame, height=60)
     spacer2.pack()
     # date
@@ -583,7 +590,7 @@ def create_overview():
     spacer2 = ttk.Frame(main_frame, height=100)
     spacer2.pack()
     # button to activate
-    button = ttk.Button(main_frame, text='Show', command=display_table, width=15)
+    button = ttk.Button(main_frame, text='Show', command=lambda: display_table(error_acount), width=15)
     button.pack(pady=30)
     
 # ------------------------- plot history graph -------------------------
@@ -592,7 +599,12 @@ def create_overview():
 # y axis - date, x axis - amount, each date is total amount at that moment
 # example: 2025-02-16 +30.00, 2025-02-17 - 20.00 -> 2025-02-16 = 30.00, 2025-02-17 = 10.00
 ###
-def plot_graph():
+def plot_graph(err_acc):
+    if selected_label.get() == 'Select Account':
+        err_acc.config(text='Must select account[s]', background=bg_button)
+        return
+    else:
+        err_acc.config(text='', background=bg_back)
     reset_window(900, 760)
     header = ttk.Label(main_frame, text=f'{selected_date.get()} history', style='header.TLabel')
     header.pack(pady=30)
@@ -696,6 +708,8 @@ def create_history():
     acounts_label.pack(pady=10)
     acounts = ttk.Button(main_frame, width=15, textvariable=selected_labels, command=lambda: multi_choice_acount(selected_labels))
     acounts.pack()
+    error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
     spacer2 = ttk.Frame(main_frame, height=60)
     spacer2.pack()
     # date choice - currently just UI 
@@ -706,7 +720,7 @@ def create_history():
     spacer3 = ttk.Frame(main_frame, height=100)
     spacer3.pack()
     # button to activate
-    button = ttk.Button(main_frame, command=plot_graph, text='Plot', width=15)
+    button = ttk.Button(main_frame, command=lambda: plot_graph(error_acount), text='Plot', width=15)
     button.pack(pady=30)
     
 # ------------------------- pie chart plot -------------------------
