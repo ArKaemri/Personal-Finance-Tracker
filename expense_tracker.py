@@ -377,7 +377,7 @@ def multi_choice_acount(label_var):
     toplevel = tk.Toplevel(main_frame)
     toplevel.configure(background=bg_back)
     top_w = 220
-    top_h = 260
+    top_h = 280
     top_sw = toplevel.winfo_screenwidth()
     top_sh = toplevel.winfo_screenheight()
     top_x = (top_sw / 2) - (top_w / 2)
@@ -388,7 +388,10 @@ def multi_choice_acount(label_var):
         # gather selected acounts
         selected = listbox.curselection()
         if not selected:
-            return ''
+            error_acount.config(text='Must select at least 1 account', background=bg_button)
+            return
+        else:
+            error_acount.config(text='', background=bg_back)
         # gather actual values - change list of indexes to actual values of those indexes
         selected_acounts = [listbox.get(i) for i in selected]
         # save list as string
@@ -412,6 +415,8 @@ def multi_choice_acount(label_var):
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
     listbox.configure(background=bg_common, foreground=fg_common, font=font_text, selectbackground=bg_selected, selectforeground=fg_button)
+    error_acount = ttk.Label(toplevel, text='', font=font_error, background=bg_back, foreground=error)
+    error_acount.pack()
     button = ttk.Button(toplevel, text='Confirm', command=save_selection, width=15)
     button.pack(pady=10)
     toplevel.grab_set()
