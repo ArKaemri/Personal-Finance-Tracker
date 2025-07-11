@@ -10,58 +10,56 @@ import tkinter.font as tkfont
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-# ------------------------- app initialisation -------------------------
+# ------------------------- parameters -------------------------
 # app instance
 window = tk.Tk(className='Expense tracker')
 
-# keep acount choice (and for visual change on button) - single acount (for multiple used to only store acount choices)
-selected_label = tk.StringVar()
+# global variables
+selected_label = tk.StringVar() # saves selected account or accounts
 selected_label.set('Select Account')
 
-selected_labels = tk.StringVar()
+selected_labels = tk.StringVar() # show item selection for multiselect button
 selected_labels.set('Select Accounts')
 
-selected_date = tk.StringVar()
+selected_date = tk.StringVar() # selected time (1/3/6/9/12 months or all time)
 selected_date.set('all time')
 
-# size of tkinter window
-w = 600
-h = 600
-# common variables
-bg_back = "#aaaaaa"
-bg_common = "#d4d4d4"
-fg_common = 'black'
-fg_button = 'white'
-bg_button = '#85929b'
-bg_selected = "#777777"
-error = '#ffb5b5'
+w = 600 # main window width
+h = 600 # main window height
 
-font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold')
-font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold')
-font_text = tkfont.Font(family='DejaVu Sans', size=-16)
-font_entry = tkfont.Font(family='DejaVu Sans', size=-16, weight='bold')
-font_error = tkfont.Font(family='DejaVu Sans', size=-12, weight='bold')
+bg_back = "#aaaaaa" # common background
+bg_common = "#d4d4d4" # background for text (input fields or selection)
+bg_button = '#85929b' # passive button color
+bg_selected = "#777777" # background when selecting items (table or choices)
 
+fg_common = 'black' # common text (that shows info or is input)
+fg_button = 'white' # text for buttons, labels, headers
+error = '#ffb5b5' # error message text color
+
+font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold') # font for window top header
+font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold') # font for labels on top of widgets
+font_text = tkfont.Font(family='DejaVu Sans', size=-16) # font for common text (table, text in graphs)
+font_entry = tkfont.Font(family='DejaVu Sans', size=-16, weight='bold') # font for entries
+font_error = tkfont.Font(family='DejaVu Sans', size=-12, weight='bold') # font for error message
+
+# custom style configuration
 style = ttk.Style()
 style.theme_use('default')
-
-# colors per widget
-# frame / spacer
+# frame / spacer (empty space)
 style.configure('TFrame',
-                background = bg_back)
-# treeview
-style.configure('Treeview',
+                background = bg_back) # background
+# treeview (table of saved data)
+style.configure('Treeview', # table of data (below header)
                 background = bg_common,
                 fieldbackground = bg_back,
                 font = font_text)
-style.configure('Treeview.Heading',
+style.configure('Treeview.Heading', # header (1-ist line)
                 background = bg_button,
                 foreground=fg_button,
                 font = font_text)
-style.map('Treeview.Heading',
+style.map('Treeview.Heading', # header when selected
           background=[('active', bg_button)])
-# change selected component color
-style.map('Treeview',
+style.map('Treeview', # table of data when selected
           background=[('selected', bg_selected)],
           foreground=[('selected', fg_button)])
 # entry
@@ -70,49 +68,46 @@ style.configure('TEntry',
                 foreground = fg_common,
                 padding = 5)
 # button
-style.configure('TButton',
+style.configure('TButton', # button when passive (just displayed)
                 background = bg_button,
                 foreground = fg_button,
                 font = font_entry,
                 padding = (4, 8))
-style.map('TButton',
+style.map('TButton', # button when pressed
           background = [('active', bg_common)],
           foreground = [('active', fg_common)])
-# disable dotted line when button pressed
-window.option_add('*TButton*takeFocus', 0)
-# label
+window.option_add('*TButton*takeFocus', 0) # disable dotted line when button is pressed
+# label (above widget)
 style.configure('field.TLabel',
                 background = bg_back,
                 foreground = fg_button,
                 font = font_label)
-# header
+# header (first text on the page)
 style.configure('header.TLabel',
                 background = bg_back,
                 foreground = fg_button,
                 font = font_header)
-# chart header
+# chart header (first text of chart)
 style.configure('chart.TLabel',
                 background = bg_button,
                 foreground = fg_button,
                 font = font_label,
                 padding = 2)
 
-# get width/height of the screen
-screen_w = window.winfo_screenwidth()
-screen_h = window.winfo_screenheight()
-
-# get coordinates of windows bottom left corner, to place it in middle
+# display window in the middle of the screen in specific size
 ### 
+# get size of actual screen
 # divide whole screen in 2 - point at middle of the screen
 # then move half of actual app to the left - get most left point (do same with height)
 # start building app from gotten point (left-bottom pixel), app border goes right for width, up for height (app centered)
 ###
+screen_w = window.winfo_screenwidth()
+screen_h = window.winfo_screenheight()
+
 x = (screen_w / 2) - (w / 2)
 y = (screen_h / 2) - (h / 2)
 
-# setup size and placement
-# x - multiply, %d - placeholder, % () - replacement in order
-window.geometry('%dx%d+%d+%d' % (w, h, x, y))
+window.geometry('%dx%d+%d+%d' % (w, h, x, y)) # x - multiply, %d - placeholder, % () - replacement in order
 
 # ------------------------- close app with Esc -------------------------
 # close window by passing variable
@@ -125,30 +120,33 @@ window.bind('<Escape>', lambda e: close_window(e))
 # ------------------------- main frame -------------------------
 # create empty frame where widgets will appear
 main_frame = tk.Frame(window, background=bg_back)
-# position it to whole space
+# make it take whole space
 main_frame.pack(fill='both', expand='True')
 
 # ------------------------- reload window -------------------------
 # goes through all widgets of parent and erases them
 def reset_window(width=600, height=600):
+    # rebuild window to specific size, choice/input windows general 600x600
     w = width
     h = height
     window.geometry('%dx%d' % (w, h))
+    
+    # destroy all widgets, to make window completely empty (anything below menu)
     for widget in main_frame.winfo_children():
         widget.destroy()
 
 # ------------------------- load acounts (single) -------------------------
-# global var to display chosen acount on button that opens choice menu
 # create new window with selections
 ###
-# on button open new window for acounts selection using listbox
-# read acount txt file and split them in acount and class (account1-live \n acount2-live -> {'live':[acount1, acount2]})
+# open new window for acounts selection using listbox
+# read acount txt file and split them in acount and class (account1-live\n acount2-live\n -> {'live':[acount1, acount2]})
 # put acounts in the listbox and activate script (saving selection) after clicking on acount + close the popup
 ###
 def load_acount_single(label_var, err):
-    # reload error message
+    # reload error message (if account is selected, error shouldn't stay)
     if selected_label.get() != 'Selected Account':
         err.config(text='', background=bg_back)
+        
     # function to select item from listbox
     def select_item(event):
         # get the widget
@@ -158,14 +156,16 @@ def load_acount_single(label_var, err):
         # if selecting empty space or similar, don't react
         if not selected:
             return
+        
         # retrieve selection values (take first element from indexes list, becouse selected only 1 items)
         index = selected[0]
         selected_value = listbox.get(index) # actual value from index position
+        
         # set global selected acount label (change button text to see what's selected and write to txt)
         label_var.set(selected_value)
         # close the popup
         listbox.master.destroy()
-        
+    # define size
     top_w = 220
     top_h = 220
     # create and position window
@@ -176,6 +176,7 @@ def load_acount_single(label_var, err):
     top_x = (top_sw / 2) - (top_w / 2)
     top_y = (top_hw / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    
     # read data from txt and write to dictionary
     acc_dict = {}
     # read file line by line
@@ -187,11 +188,13 @@ def load_acount_single(label_var, err):
             value, key = line.split('-')
             # add all values with same key as a list to that key - {'key':[a, b, c]}
             acc_dict.setdefault(key, []).append(value)
+            
     # create listbox
     # flatten all values into 1 list - {'key1':[a, b], 'key2':[c, d]} -> [a, b, c, d]
     all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
     # convert to tuple and add as listbox variables
     acount_var = tk.Variable(value=tuple(all_acounts))
+    
     # create listbox widget
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.SINGLE)
     listbox.pack()
@@ -199,13 +202,13 @@ def load_acount_single(label_var, err):
     listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
     # select an item from list (activate immediately after click)
     listbox.bind('<<ListboxSelect>>', select_item)
-    # prevent from opening more windows
+    # prevent from opening more windows (can't click on window behind)
     toplevel.grab_set()
     
 # ------------------------- save entry inputs -------------------------
 ###
 # takes data from widgets (saved acount and inputs)
-# transform the data: amount (split to state -/+ and format .00); 
+# transform the data: amount (split to state -/+ and format as float -> .00); 
 #                     purpose (text to lowercase to not acidentaly make 2 seperate purposes Gift and gift - same, but code will think different)
 # add inputs to txt, then reset window and replace widgets with empty ones
 ###
@@ -215,15 +218,17 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
     # get and lowercase text
     text = text.get().lower()
     # get the date of input
-    date = datetime.datetime.now().strftime('%Y-%m-%d')
-    # get the direction (spent or gain money)
-    # get amount in text form without spaces - '- 20', '-20', ' - 20' -> '-20' (prevent problems from different input)
+    date = datetime.datetime.now().strftime('%Y-%m-%d') # format as YYYY-MM-DD -> 2025-07-11
+    # get the purpose (spent or gain money)
+    # get amount in text form without spaces -> '- 20', '-20', ' - 20' becomes '-20' (prevent problems from different input)
     amount_text = amount.get().strip()
+    
+    # checks
     # check if acount is chosen
-    if acount == 'Select Account':
+    if acount == 'Select Account': # account is not selcted, throw error message and prevent activation
         er_acount.config(text='Must select account', background=bg_button)
         return
-    else:
+    else: # hide the error message if all good
         er_acount.config(text='', background=bg_back)
     # check if amount is not empty
     if amount_text == '':
@@ -232,7 +237,7 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
     else:
         er_amount.config(text='', background=bg_back)
     # check if amount is numeric
-    if not re.match(r'^[+-]?\d+(\.\d{1,2})?$', amount_text):
+    if not re.match(r'^[+-]?\d+(\.\d{1,2})?$', amount_text): # checks for amount to have: +/-/nothing at start and number to match 0, 0.0, 0.00 
         er_amount.config(text='Input should be in format: +00 OR 00.00 OR -00.0', background=bg_button)
         return
     else:
@@ -249,29 +254,34 @@ def save_entry(amount, text, er_amount, er_text, er_acount):
         return
     else:
         er_text.config(text='', background=bg_back)
+    
     # add gain/spent variable depending on symbol +/-/nothing
-    if amount_text.startswith('-'):
+    if amount_text.startswith('-'): # - at start
         state = '-'
         amount_text = amount_text[1:].strip() # save characters after 1-st element (-)
-    elif amount_text.startswith('+'):
+    elif amount_text.startswith('+'): # + at start
         state = '+'
         amount_text = amount_text[1:].strip()
-    else:
+    else: # nothing at start
         state = '+'
+    
     # convert amount text to number (float)
     amount_val = float(amount_text)
+    
     # write into file
-    output = f'{date}|{acount}|{state}|{amount_val:.2f}|{text}'
+    output = f'{date}|{acount}|{state}|{amount_val:.2f}|{text}' # 2025-07-11|bank|-|234.00|bought new tv
     with open('finance_test.txt', 'a') as file:
         file.write('\n' + output)
+        
     # reset window
-    selected_label.set('Select Account')
+    selected_label.set('Select Account') # restart account variable
     reset_window()
-    create_entry()
+    create_entry() # recreate widgets with empty inputs
     
 # ------------------------- add acount -------------------------
 ###
-# on button open popup to input acount which is saved to acount txt as <input>-live
+# open popup to input acount which is saved to acount txt as <input>-live
+# before input go through the file and check if such account is already exist
 ###
 def add_new_acount():
     # create popup
@@ -284,13 +294,15 @@ def add_new_acount():
     top_x = (top_sw / 2) - (top_w / 2)
     top_y = (top_sh / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    
     # add entry
-    new_label = ttk.Label(toplevel, text='Input new account', style='field.TLabel')
+    new_label = ttk.Label(toplevel, text='Input new account', style='field.TLabel') # label
     new_label.pack(pady=15)
-    new_entry = ttk.Entry(toplevel, font=font_entry)
+    new_entry = ttk.Entry(toplevel, font=font_entry) # entry field
     new_entry.pack(pady=5)
-    error_msg = ttk.Label(toplevel, text='', font=font_error, foreground=error, background=bg_back)
+    error_msg = ttk.Label(toplevel, text='', font=font_error, foreground=error, background=bg_back) # empty error message placeholder
     error_msg.pack()
+    
     # entry function
     def new_acount():
         # get variable from entry
@@ -299,52 +311,59 @@ def add_new_acount():
         if acount == '':
             error_msg.config(text='Input field cannot be empty', background=bg_button)
             return
+        
         # if variable exist in file, show error
         with open('acounts_test.txt', 'r') as file:
+            # read all content
             content = file.readlines()
+            # go through line by line
             for line in content:
+                # extract account name from line -> get 'bank-live\n' -> becomes 'bank'
                 line = line.strip().split('-')[0]
+                # if match, throw error and prevent script from activating
                 if acount == line:
                     error_msg.config(text='Such account already exists', background=bg_button)
                     return
+                
         # write to file
         with open('acounts_test.txt', 'a') as file:
             file.write('\n' + acount + '-live')
         # close popup
         toplevel.destroy()
+        
     # add confirm button
     new_button = ttk.Button(toplevel, text='Confirm', command=new_acount, style='TButton', width=15)
     new_button.pack(pady=20)
     toplevel.grab_set()
 
 # ------------------------- entry UI -------------------------
-###
 # create and display widgets for entry window (add new information to finance.txt)
-###
-# add entry window
 def create_entry():
     # delete widgets on the screen
     reset_window()
-    # entry only takes 1 account, if previously more selected, reset it, otherwise - persist
-    if len(selected_label.get().split(',')) >= 2 or selected_label.get() == 'all':
+    # entry only takes 1 account, if previously more selected, reset it
+    if len(selected_label.get().split(',')) >= 2 or selected_label.get() == 'all': # if selected account is list from more than 1 value or this value is 'all', reset the global variable
         selected_label.set('Select Account')
+        
     # label of the window
     header = ttk.Label(main_frame, text='New Entry', style='header.TLabel')
     header.pack(pady=30)
-    # acount choice, currently just UI element
+    
+    # acount choice
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
     button_frame = ttk.Frame(main_frame) # to position acount buttons in row
     button_frame.pack(pady=5)
     error_acount = ttk.Label(main_frame, text='', font=font_error, background=bg_back, foreground=error)
     error_acount.pack()
-    acounts = ttk.Button(button_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label, error_acount), width=15)
+    acounts = ttk.Button(button_frame, textvariable=selected_label, command=lambda: load_acount_single(selected_label, error_acount), width=15) # left button
     acounts.pack(side=tk.LEFT, padx=0, pady=0)
-    add_acount = ttk.Button(button_frame, text='+', command=add_new_acount, width=4)
+    add_acount = ttk.Button(button_frame, text='+', command=add_new_acount, width=4) # right button
     add_acount.pack(side=tk.LEFT, padx=0, pady=0)
     # spacer to put gap between widgets
     spacer1 = ttk.Frame(main_frame, height=30)
     spacer1.pack()
+    
     # amount input field
     amount_label = ttk.Label(main_frame, text='Input amount', style='field.TLabel')
     amount_label.pack(pady=10)
@@ -354,6 +373,7 @@ def create_entry():
     error_amount.pack()
     spacer2 = ttk.Frame(main_frame, height=30)
     spacer2.pack()
+    
     # source/desination input field
     purpose_label = ttk.Label(main_frame, text='Gain source / spent destination', style='field.TLabel')
     purpose_label.pack(pady=10)
@@ -363,17 +383,17 @@ def create_entry():
     error_text.pack()
     spacer3 = ttk.Frame(main_frame, height=21)
     spacer3.pack()
+    
     # activation button - save to txt file
     button = ttk.Button(main_frame, command=lambda: save_entry(amount, text, error_amount, error_text, error_acount), text='Save', width=15)
     button.pack(pady=15)
     
 # ------------------------- multi-choice acount select -------------------------
-###
 # same as load_acount_single, but choose acounts on button press (not on mouse click) and can choose multiple choices
-###
 def multi_choice_acount(label_var, err):
     if selected_labels.get() != 'Select Accounts':
         err.config(text='', background=bg_back)
+        
     # create popup
     toplevel = tk.Toplevel(main_frame)
     toplevel.configure(background=bg_back)
@@ -384,6 +404,7 @@ def multi_choice_acount(label_var, err):
     top_x = (top_sw / 2) - (top_w / 2)
     top_y = (top_sh / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    
     # deselect all/other
     ###
     # follow user selected accounts to prevent choosing 'all' when other selections are made and opposite
@@ -396,6 +417,7 @@ def multi_choice_acount(label_var, err):
         clicked_item = listbox.get(clicked_index)
         selected = listbox.curselection()
         selected_acounts = [listbox.get(i) for i in selected]
+        
         # all check, if current click is 'all'
         if clicked_item == 'all':
             # if 'all' selected alongside other selections
@@ -406,6 +428,7 @@ def multi_choice_acount(label_var, err):
                     listbox.selection_clear(i)
             # update selection (checks after each click)
             listbox.selection_set(clicked_index)
+            
         # if all is selected before
         else:
             # all was selected, but not current selection
@@ -415,15 +438,18 @@ def multi_choice_acount(label_var, err):
                     if listbox.get(i) == 'all':
                         # deselect all, only keep other
                         listbox.selection_clear(i)
+                        
     # save selected acounts
     def save_selection():
         # gather selected acounts
         selected = listbox.curselection()
+        # check if atlesat 1 account is selected
         if not selected:
             error_acount.config(text='Must select at least 1 account', background=bg_button)
             return
         else:
             error_acount.config(text='', background=bg_back)
+            
         # gather actual values - change list of indexes to actual values of those indexes
         selected_acounts = [listbox.get(i) for i in selected]
         # save list as string
@@ -434,6 +460,7 @@ def multi_choice_acount(label_var, err):
         label_var.set(selected_list if len(selected_acounts) <= 2 else ', '.join(selected_acounts[:2]) + '...')
         # close window 
         listbox.master.destroy()
+        
     # display selection
     acc_dict = {}
     with open('acounts_test.txt', 'r') as file:
@@ -444,6 +471,7 @@ def multi_choice_acount(label_var, err):
     all_acounts = [acc for acounts in acc_dict.values() for acc in acounts]
     all_acounts.append('all') # add posibility to choose all acounts from list
     acount_var = tk.Variable(value=tuple(all_acounts))
+    
     listbox = tk.Listbox(toplevel, listvariable=acount_var, selectmode=tk.MULTIPLE)
     listbox.pack()
     listbox.configure(background=bg_common, foreground=fg_common, font=font_text, selectbackground=bg_selected, selectforeground=fg_button)
@@ -457,7 +485,7 @@ def multi_choice_acount(label_var, err):
 # ------------------------- display pandas table -------------------------
 ###
 # read txt file and create pandas table, keep only rows that have same acount as chosen acounts from popup and date (create_table)
-# creat trieview widget that saves dataframe object
+# creat treeview widget that saves dataframe object
 # group data by acount, make acount 'parent' and rows of that acount as 'children', so it becomes foldable
 ###
 # choose time same as single account
@@ -467,6 +495,7 @@ def choose_time(label_var):
         selected = listbox.curselection()
         if not selected: 
             return
+        
         index = selected[0]
         selected_value = listbox.get(index)
         label_var.set(selected_value)
@@ -480,8 +509,10 @@ def choose_time(label_var):
     top_x = (top_sw / 2) - (top_w / 2)
     top_y = (top_hw / 2) - (top_h / 2)
     toplevel.geometry('%dx%d+%d+%d' % (top_w, top_h, top_x, top_y))
+    
     values = ['1 month', '3 months', '6 months', '9 months', '1 year', 'all time']
     time_var = tk.Variable(value=tuple(values))
+    
     listbox = tk.Listbox(toplevel, listvariable=time_var, selectmode=tk.SINGLE)
     listbox.pack()
     listbox.configure(background=bg_common, foreground=fg_common, font=font_text)
@@ -492,18 +523,21 @@ def choose_time(label_var):
 def create_table():
     # create dataframe
     df = pd.read_csv('finance_test.txt', sep='|')
-    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d') # transform text to pd date
+    
     # filter by acount
     def filter_acount(dataframe):
-        acount_list = selected_label.get().split(',')
-        acount_list = [acc.strip() for acc in acount_list]
-        filtered_df = dataframe[dataframe['acount'].isin(acount_list)]
+        acount_list = selected_label.get().split(',') # get accounts
+        acount_list = [acc.strip() for acc in acount_list] # strip anything extra
+        filtered_df = dataframe[dataframe['acount'].isin(acount_list)] # check if selected accounts are in the full account list
         return filtered_df
+    
     # filter by time
     def filter_time(dataframe):
         date = selected_date.get()
-        # calculate date (n month from the date of last input (not from current day))
+        # calculate date (n month from the date of last input (not from current day)) + 00.00.00 time 
         max_date = dataframe['date'].max().normalize()
+        
         if date == '1 month':
             min_date = max_date - pd.DateOffset(months=1)
         elif date == '3 months':
@@ -516,31 +550,33 @@ def create_table():
             min_date = max_date - pd.DateOffset(years=1)
         elif date == 'all time':
             return dataframe
-        else:
+        else: # failsafe, find earliest date and filter from it
             min_date = dataframe['date'].min()
-        filtered_df = dataframe[(dataframe['date'] >= min_date) & (dataframe['date'] <= max_date)]
+            
+        filtered_df = dataframe[(dataframe['date'] >= min_date) & (dataframe['date'] <= max_date)] # keep only date in bounds min_date-max_date
         return filtered_df
-    # add column for cumulative amount (how much amount is total at specific date)
-    df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1).apply(lambda x: round(x, 2))
-    df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum().apply(lambda x: round(x, 2))
+    
+    # add column for cumulative amount (how much amount is total at specific date) -> day1 = 23.00, day2 = 10.00 -> day1_sum = 23.00, day2_sum = 33.00
+    df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1).apply(lambda x: round(x, 2)) # if symbol '+' -> +number, else -> -number, then format 00.00
+    df['current_amount'] = df.groupby('acount')['signed_amount'].cumsum().apply(lambda x: round(x, 2)) # group by account, add 'signed_amount' for each new line, format as 00.00
     # get acount list for filter
-    if selected_label.get() == 'all' and selected_date.get() == 'all time':
+    if selected_label.get() == 'all' and selected_date.get() == 'all time': # if all time and all accounts, don't filter
         df = df.copy()
-        df['date'] = df['date'].dt.date
+        df['date'] = df['date'].dt.date # take away 00.00.00 from dates
         return df
-    elif selected_label.get() != 'all' and selected_date.get() == 'all time':
+    elif selected_label.get() != 'all' and selected_date.get() == 'all time': # if selected account, filter only account
         # filter by acounts
         filtered_df = filter_acount(df)
         filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df       
-    elif selected_label.get() == 'all' and selected_date.get() != 'all time':
+    elif selected_label.get() == 'all' and selected_date.get() != 'all time': # if selected date, filter only date
         # filter by acounts
         filtered_df = filter_time(df)
         filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df  
-    else:
+    else: # if selected account and date, filter by both
         filtered_df = filter_acount(df)
         filtered_df = filter_time(filtered_df)
         filtered_df = filtered_df.copy()
@@ -554,17 +590,20 @@ def display_table(err_acc):
         return
     else:
         err_acc.config(text='', background=bg_back)
+        
     reset_window(1100, 800)
     # create widget
     tree = ttk.Treeview(main_frame)
     tree['columns'] = ('date', 'gain/spent', 'amount', 'current amount', 'purpose')
+    
     # display column names
-    tree.heading('#0', text='acount')
+    tree.heading('#0', text='acount') # 'parent' column
     tree.heading('date', text='Date')
     tree.heading('gain/spent', text='Gain/Spent')
     tree.heading('amount', text='Amount')
     tree.heading('current amount', text='Current amount')
     tree.heading('purpose', text='Purpose')
+    
     # config columns width
     tree.column('#0', width=170)
     tree.column('date', width=45)
@@ -572,6 +611,7 @@ def display_table(err_acc):
     tree.column('amount', width=65, anchor=tk.CENTER)
     tree.column('current amount', width=100, anchor=tk.CENTER)
     tree.column('purpose', width=310, anchor=tk.CENTER)
+    
     # populate treeview grouped by acount
     df = create_table()
     # group by acount
@@ -586,14 +626,13 @@ def display_table(err_acc):
             # insert values
             round(row['current_amount'], 2)
             tree.insert(parent_id, tk.END, values=(row['date'], row['symbol'], row['amount'], row['current_amount'], row['purpose']), tag='finance_row')
+            
     tree.pack(expand=True, fill=tk.BOTH, selectmode=None)
     tree.tag_configure('account_row', background=bg_button, foreground=fg_button)
     tree.tag_configure('finance_row', background=bg_common, foreground=fg_common)
 
 # ------------------------- overview UI -------------------------
-###
-# create and display widgets for overview window (table of finance.txt file)
-###
+# create and display widgets for overview window (table of finance.txt file in app)
 def create_overview():
     reset_window()
     # keep previous account choice if it is not multiple
@@ -601,11 +640,13 @@ def create_overview():
         selected_labels.set(selected_label.get())
     elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
         selected_labels.set('Select Acounts')
+        
     # label of the window
     header = ttk.Label(main_frame, text='Finance Overview', style='header.TLabel')
     header.pack(pady=20)
     spacer1 = ttk.Frame(main_frame, height=60)
     spacer1.pack()
+    
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acounts', style='field.TLabel')
     acounts_label.pack(pady=10)
@@ -615,6 +656,7 @@ def create_overview():
     error_acount.pack()
     spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
+    
     # date
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
     date_label.pack(pady=10)
@@ -622,6 +664,7 @@ def create_overview():
     date.pack()
     spacer2 = ttk.Frame(main_frame, height=100)
     spacer2.pack()
+    
     # button to activate
     button = ttk.Button(main_frame, text='Show', command=lambda: display_table(error_acount), width=15)
     button.pack(pady=30)
@@ -630,7 +673,7 @@ def create_overview():
 ###
 # display scatter plot with connected lines of changing amount for selected acounts
 # y axis - date, x axis - amount, each date is total amount at that moment
-# example: 2025-02-16 +30.00, 2025-02-17 - 20.00 -> 2025-02-16 = 30.00, 2025-02-17 = 10.00
+# example: 2025-02-16 +30.00, 2025-02-17 -20.00 -> 2025-02-16 = 30.00, 2025-02-17 = 10.00
 ###
 def plot_graph(err_acc):
     if selected_label.get() == 'Select Account':
@@ -638,32 +681,38 @@ def plot_graph(err_acc):
         return
     else:
         err_acc.config(text='', background=bg_back)
+        
     reset_window(900, 760)
     header = ttk.Label(main_frame, text=f'{selected_date.get()} history', style='header.TLabel')
     header.pack(pady=30)
+    
     # get values
     df = create_table()
     # create graph
-    fig = Figure(figsize=(9, 6))
-    fig.set_facecolor(bg_back)
-    ax = fig.add_subplot(111)
-    ax.set_facecolor(bg_common)
+    fig = Figure(figsize=(9, 6)) # size of graph
+    fig.set_facecolor(bg_back) # color of background (not graph itself)
+    ax = fig.add_subplot(111) # create plot for graph
+    ax.set_facecolor(bg_common) # color of graph
+    
     scatter_plots = [] # need to store multiple accounts for hover
     for acount, group in df.groupby('acount'):
-        x = group['date']
-        y = group['current_amount']
+        x = group['date'] # y axis
+        y = group['current_amount'] # x axis
         sc = ax.scatter(x, y, label=acount, picker=True) # let interactive function (hover)
-        ax.plot(x, y)
+        ax.plot(x, y) # plot points
         scatter_plots.append((sc, group)) # append scatter plot and actual data
+        
     # config plot
     ax.set_xlabel('Date')
     ax.set_ylabel('Amount')
+    
     legend = ax.legend()
-    legend.get_frame().set_facecolor(bg_common)
-    legend.get_frame().set_edgecolor(fg_common)
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-    fig.autofmt_xdate()
+    legend.get_frame().set_facecolor(bg_common) # background color in legend
+    legend.get_frame().set_edgecolor(fg_common) # border color (and text)
+    
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator()) # how many dates to show (example: 1 year, each line is 2 months; 1 months, each line 5 days)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d')) # shows dates as YYYY-MM-DD
+    fig.autofmt_xdate() # rotates dates to not overflow on each other
     # place canvas
     canvas = FigureCanvasTkAgg(fig, master=main_frame)
     canvas.draw()
@@ -675,18 +724,19 @@ def plot_graph(err_acc):
     # create empty annotation object that displays nothing and save every scatter point and their actual dataframes (for multiple accounts)
     # check if mouse hovering inside the plot, if yes, check if it is near any point
     # if mouse is near the point, go through every scatter plot and find close points
-    # when mouse is on the point get the row of location in any scatter point and display annotation
+    # when mouse is on the point get the location of row in any scatter point and display annotation
     ###
-    annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder
+    annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder, xy - starting point (the hover), xytext - where the text is (20 points out)
                         bbox = dict(boxstyle='round', fc=bg_common, edgecolor=fg_common), # background of annotation
-                        arrowprops = dict(arrowstyle='->')) # show which point is hovered
+                        arrowprops = dict(arrowstyle='->')) # show which point is hovered by pointing ->
     annot.set_visible(False)
+    
     # update annotation
     def update_annot(sc, ind, group):
         # get coordinates of hovered object
-        x, y = sc.get_offsets()[ind['ind'][0]]
+        x, y = sc.get_offsets()[ind['ind'][0]] # get_offsets - get all scatter points (x, y), ind - the selected point
         # get date value 
-        date_str = group.iloc[ind['ind'][0]]['date'].strftime('%Y-%m-%d')
+        date_str = group.iloc[ind['ind'][0]]['date'].strftime('%Y-%m-%d') # iloc - get row of the index
         # get amount value
         amount = group.iloc[ind['ind'][0]]['current_amount']
         # get coordinates
@@ -694,6 +744,7 @@ def plot_graph(err_acc):
         # format and set text
         text = f'{date_str}\n{amount:.2f}'
         annot.set_text(text)
+        
     # hover function
     def hover(event):
         # get current visibility (do annotation exist currently or not)
@@ -711,19 +762,18 @@ def plot_graph(err_acc):
                     annot.set_visible(True)
                     canvas.draw_idle()
                     return
-        # if annotation was visible before (from earliear hover)
+        # if annotation was visible before (from earliear hover), hide it
         if vis:
             annot.set_visible(False)
             canvas.draw_idle()
+            
     # connect hover function to plot
     canvas.mpl_connect('motion_notify_event', hover)
     # place toolbar
     canvas.get_tk_widget().pack()
 
 # ------------------------- history UI -------------------------
-###
 # create and display widgets for history window (matplotlib line graph of finance.txt)
-###
 def create_history():
     reset_window()
     # keep previous account choice if it is not multiple
@@ -731,11 +781,13 @@ def create_history():
         selected_labels.set(selected_label.get())
     elif selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
         selected_labels.set('Select Acounts')
+        
     # label of the window
     header = ttk.Label(main_frame, text='Finance History', style='header.TLabel')
     header.pack(pady=20)
     spacer1 = ttk.Frame(main_frame, height=60)
     spacer1.pack()
+    
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
@@ -745,6 +797,7 @@ def create_history():
     error_acount.pack()
     spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
+    
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
     date_label.pack(pady=10)
@@ -752,14 +805,16 @@ def create_history():
     date.pack()
     spacer3 = ttk.Frame(main_frame, height=100)
     spacer3.pack()
+    
     # button to activate
     button = ttk.Button(main_frame, command=lambda: plot_graph(error_acount), text='Plot', width=15)
     button.pack(pady=30)
     
 # ------------------------- pie chart plot -------------------------
 ###
-# display 2 pie charts for 1 acount, 1-st for spending, 2-nd for earning
+# display 2 pie charts for 1 acount, 1-st for spending, 2-nd for earning stacked vertically
 # calculate total spending/earning and plot how much of total % is each reason (where spent/earnt the money)
+# example: total spending is 1000, 300 is labeled as 'gift', 300 'job', 400 'hussle', chart will have 30% 'gift', 30% 'job', 40% 'hussle' in chart plot
 ###
 def plot_chart(err_acc):
     if selected_label.get() == 'Select Account':
@@ -767,32 +822,33 @@ def plot_chart(err_acc):
         return
     else: 
         err_acc.config(text='', background=bg_back)
+        
     reset_window(740, 800)
     df = create_table()
     # label of what acount chosen
     header = ttk.Label(main_frame, text=f'{selected_label.get()} earning/spending', style='header.TLabel')
     header.pack(pady=15)
+    
     # find total spending/earning
     total_earning = df[df['symbol'] == '+']['amount'].sum()
     total_spending = df[df['symbol'] == '-']['amount'].sum()
+    
     # earning pie 
-    # frame for 1 chart
-    frame1 = ttk.Frame(main_frame)
-    # frame1.pack(side='left', padx=10)
+    frame1 = ttk.Frame(main_frame) # frame for 1-st chart (earning)
     frame1.pack(pady=15)
     # label with total
     label1 = ttk.Label(frame1, text=f'Earnings (Total: {total_earning:.2f})', style='chart.TLabel', foreground='#31ffd2')
     label1.pack(fill='x')
     # purposes and their % from total  
-    percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum()
+    percent1 = df[df['symbol'] == '+'].groupby('purpose')['amount'].sum() # group all '+' rows by purpose and sum all amounts for each purpose
     # figure
     fig1 = Figure(figsize=(7, 3))
     fig1.set_facecolor(bg_common)
     ax1 = fig1.add_subplot(111)
-    _, purposes1, _ = ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})')
+    _, purposes1, _ = ax1.pie(percent1, labels=percent1.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})') # labels - index of purpose, autpct - percent \newline amount of slice
+    
     # spending pie
     frame2 = tk.Frame(main_frame)
-    # frame2.pack(side='right', padx=10)
     frame2.pack(pady=15)
     label2 = ttk.Label(frame2, text=f'Spendings (Total: -{total_spending:.2f})', style='chart.TLabel', foreground="#ffa1a1")
     label2.pack(fill='x')
@@ -801,11 +857,13 @@ def plot_chart(err_acc):
     fig2.set_facecolor(bg_common)
     ax2 = fig2.add_subplot(111)
     _, purposes2, _ = ax2.pie(percent2, labels=percent2.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_spending / 100:.2f})')
+    
     # color labels white
     for p in purposes1:
         p.set_color(fg_common)
     for p in purposes2:
         p.set_color(fg_common)
+        
     # finalise
     canvas1 = FigureCanvasTkAgg(fig1, master=frame1)
     canvas2 = FigureCanvasTkAgg(fig2, master=frame2)
@@ -813,20 +871,19 @@ def plot_chart(err_acc):
     canvas2.get_tk_widget().pack()
  
 # ------------------------- chart UI -------------------------
-###
 # create and display widgets for chart window (matplotlib pie chart of finance.txt)
-###
 def create_chart():
     reset_window()
-    # don't reset account choice if they correct for chart
     # chart only takes 1 account, if previously more selected, reset it, otherwise - persist
     if len(selected_label.get().split(',')) >= 2 or selected_label.get() == 'all':
         selected_label.set('Select Account')
+        
     # label of the window
     header = ttk.Label(main_frame, text='Earning/Spending Chart', style='header.TLabel')
     header.pack(pady=20)
     spacer1 = ttk.Frame(main_frame, height=60)
     spacer1.pack()
+    
     # account choice
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
@@ -836,6 +893,7 @@ def create_chart():
     error_acount.pack()
     spacer2 = ttk.Frame(main_frame, height=50)
     spacer2.pack()
+    
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
     date_label.pack(pady=10)
@@ -843,20 +901,23 @@ def create_chart():
     date.pack()
     spacer3 = ttk.Frame(main_frame, height=100)
     spacer3.pack()
+    
     # button to activate
     button = ttk.Button(main_frame, command=lambda: plot_chart(error_acount), text='Plot', width=15)
     button.pack(pady=30)
 
 # ------------------------- export UI -------------------------
 ###
-# export whole data (with cumulative + current amounts) into .csv or .xlsx formats
+# export whole data (with total + current amounts) into .csv or .xlsx formats
 # take file name and path, pass to to_excel or to_csv functions
 ###
 def export_data(type, name, er_acc, er_name):
     df = create_table()
     # drop signed_amount, only needed for calculations
     df = df.drop('signed_amount', axis=1)
+    # get name
     file_name = name.get()
+    
     # check empty
     if selected_label.get() == 'Select Account':
         er_acc.config(text='Must select account[s]', background=bg_button)
@@ -869,28 +930,28 @@ def export_data(type, name, er_acc, er_name):
     else:
         er_name.config(text='', background=bg_back)
     
+    # open file choosing window (where to save the file)
     file_dest = filedialog.askdirectory(title='Select folder to save file')
     if not file_dest:
         return
-    os.makedirs(file_dest, exist_ok=True)
-    file_path = os.path.join(file_dest, f'{file_name}.{type}')
-    print(file_path)
     
-    if type == 'csv':
+    file_path = os.path.join(file_dest, f'{file_name}.{type}') # build absolute path
+    
+    # export
+    if type == 'csv': # export to csv if in CSV window
         df.to_csv(file_path, index=False)
-    else:
+    else: # export to xlxs if in CSV window
         df.to_excel(file_path, index=False)
         
     reset_window()
     create_export(type)
 
 # ------------------------- export UI -------------------------
-###
 # create and display widgets for export window (export finance.txt as .csv or .xlsx)
-###
 def create_export(file_type):
     if selected_label.get() == 'Select Account' and selected_labels.get() != 'Select Acounts':
         selected_labels.set('Select Acounts')
+        
     # choose text based on menu selection
     if file_type == 'csv':
         text_choice = 'Export to CSV'
@@ -898,10 +959,12 @@ def create_export(file_type):
     elif file_type == 'xlsx':
         text_choice = 'Export to xlsx'
         button_choice = 'Save to xlsx'
+        
     reset_window()
     # label of the window
     header = ttk.Label(main_frame, text=text_choice, style='header.TLabel')
     header.pack(pady=30)
+    
     # acount choice, currently just UI element
     acounts_label = ttk.Label(main_frame, text='Choose acount', style='field.TLabel')
     acounts_label.pack(pady=10)
@@ -911,6 +974,7 @@ def create_export(file_type):
     error_acount.pack()
     spacer1 = ttk.Frame(main_frame, height=25)
     spacer1.pack()
+    
     # date choice - currently just UI 
     date_label = ttk.Label(main_frame, text='Choose time period', style='field.TLabel')
     date_label.pack(pady=15)
@@ -918,6 +982,7 @@ def create_export(file_type):
     date.pack()
     spacer2 = ttk.Frame(main_frame, height=29)
     spacer2.pack()
+    
     # file name input field
     name_label = ttk.Label(main_frame, text='Name the file', style='field.TLabel')
     name_label.pack(pady=15)
@@ -927,14 +992,12 @@ def create_export(file_type):
     error_name.pack()
     spacer3 = ttk.Frame(main_frame, height=20)
     spacer3.pack()
+    
     # activation button - save to txt file
     button = ttk.Button(main_frame, command=lambda: export_data(file_type, name, error_acount, error_name), text=button_choice, width=15)
     button.pack(pady=20)
 
 # ------------------------- create menu -------------------------
-###
-# create and display menu for changing windows
-###
 # create main menu (whole top bar where all options reside)
 def create_menu():
     menu = tk.Menu(window)
