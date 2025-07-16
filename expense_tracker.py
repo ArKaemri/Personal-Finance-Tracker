@@ -14,8 +14,8 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 window = tk.Tk(className='Expense tracker')
 
 # ------------ global variables
-account_file = 'acounts_test.txt'
-finance_file = 'finance_test.txt'
+account_file = 'account.txt'
+finance_file = 'finance.txt'
 
 screen_w = window.winfo_screenwidth()
 screen_h = window.winfo_screenheight()
@@ -25,6 +25,7 @@ selected_account.set('Select Account')
 
 selected_account_label = tk.StringVar() # show item selection for multiselect button
 selected_account_label.set('Select Accounts')
+trunc_acc = tk.StringVar()
 
 selected_date = tk.StringVar() # selected time (1/3/6/9/12 months or all time)
 selected_date.set('all time')
@@ -444,7 +445,7 @@ def add_new_account():
 # before input go through the file and check if such account is already exist
 ###
     toplevel = create_toplevel(main_frame, 220, 200)
-    create_text_widget(toplevel, 'label', 'Input new account', spacer_pady=15)
+    create_text_widget(toplevel, 'label', 'Input new account', label_pady=15)
     entry = create_entry(toplevel)
     error_msg = create_error_msg(toplevel)
     
@@ -462,11 +463,14 @@ def add_new_account():
                     error_msg.config(text='Such account already exist', background=bg_button)
                     return
         # write to file if not duplicate
-        with open(account_file, 'a') as file:
-            file.write('\n' + account + '-live')
+        with open(account_file, 'r+') as file:
+            if not file.read().strip():
+                file.write(account + '-live')
+            else:
+                file.write('\n' + account + '-live')
         toplevel.destroy()
         
-    create_button(toplevel, 'Confirm', 20, 0, new_account)
+    create_button(toplevel, 'Confirm', 15, 0, new_account)
 
 # save new entry 
 def save_entry(amount, text, error_amount, error_text, error_account, frame):
@@ -514,7 +518,6 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     output = f'{date}|{account}|{state}|{amount_val:.2f}|{text}' # 2025-07-11|bank|-|234.00|bought new tv
     with open(finance_file, 'a') as file:
         file.write('\n' + output)
-    
     selected_account.set('Select Account')
     reset_window(window)
     create_entry_window(frame)
@@ -782,7 +785,7 @@ def create_entry_window(frame):
     error_text = create_error_msg(frame)
 
     # activation button
-    create_button(frame, 'Save', 15, 21, lambda: save_entry(amount, text, error_amount, error_text, error_account, frame))
+    create_button(frame, 'Save', 15, 15, lambda: save_entry(amount, text, error_amount, error_text, error_account, frame))
 
 # overview UI
 def create_overview_window(frame):
@@ -791,18 +794,18 @@ def create_overview_window(frame):
         return
         
     # header
-    create_text_widget(frame, 'header', 'Finance Overview', 10, 20)
+    create_text_widget(frame, 'header', 'Finance Overview')
     # account choice
-    create_text_widget(frame, 'label', 'Choose accounts')
+    create_text_widget(frame, 'label', 'Choose accounts', 20)
     create_button(frame, None, 5, None, lambda: multi_choice_account(selected_account_label, error_account), selected_account_label)
     error_account = create_error_msg(frame)
 
     # date
-    create_text_widget(frame, 'label', 'Choose time period', 10)
+    create_text_widget(frame, 'label', 'Choose time period', 30)
     create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
     
     # button to activate
-    create_button(frame, 'Show', 30, 20, lambda: display_table(error_account))
+    create_button(frame, 'Show', 20, 44, lambda: display_table(error_account))
 
 # history UI
 def create_history_window(frame):
@@ -811,19 +814,19 @@ def create_history_window(frame):
         return
         
     # header
-    create_text_widget(frame, 'header', 'Finance History', 20, 20)
+    create_text_widget(frame, 'header', 'Finance History', 20)
     
     # account choice
     create_text_widget(frame, 'label', 'Choose account')
-    create_button(frame, None, 5, 0, lambda: multi_choice_account(selected_account_label, error_account), selected_account_label)
+    create_button(frame, None, 5, None, lambda: multi_choice_account(selected_account_label, error_account), selected_account_label)
     error_account = create_error_msg(frame)
     
     # date choice
-    create_text_widget(frame, 'label', 'Choose time period', 20)
+    create_text_widget(frame, 'label', 'Choose time period', 30)
     create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
     
     # button to activate
-    create_button(frame, 'Plot', 30, 20, lambda: plot_graph(error_account))
+    create_button(frame, 'Plot', 20, 44, lambda: plot_graph(error_account))
 
 # chart UI
 def create_chart_window(frame):
@@ -832,19 +835,19 @@ def create_chart_window(frame):
         return
         
     # header
-    create_text_widget(frame, 'header', 'Earning/Spending chart', 20, 20)
+    create_text_widget(frame, 'header', 'Earning/Spending chart', 20)
     
     # account choice
     create_text_widget(frame, 'label', 'Choose account')
-    create_button(frame, None, 5, 0, lambda: load_account_single(selected_account, error_account), selected_account)
+    create_button(frame, None, 5, None, lambda: load_account_single(selected_account, error_account), selected_account)
     error_account = create_error_msg(frame)
     
     # date choice
-    create_text_widget(frame, 'label', 'Choose time period', 20)
+    create_text_widget(frame, 'label', 'Choose time period', 30)
     create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
     
     # button to activate
-    create_button(frame, 'Plot', 30, 20, lambda: plot_chart(error_account))
+    create_button(frame, 'Plot', 20, 44, lambda: plot_chart(error_account))
 
 # export UI
 def create_export_window(file_type, frame):
@@ -865,7 +868,7 @@ def create_export_window(file_type, frame):
 
     # account choice
     create_text_widget(frame, 'label', 'Choose account')
-    create_button(frame, None, 5, 0, lambda: multi_choice_account(selected_account_label, error_account), selected_account_label)
+    create_button(frame, None, 5, None, lambda: multi_choice_account(selected_account_label, error_account), selected_account_label)
     error_account = create_error_msg(frame)
     
     # date choice
@@ -873,12 +876,12 @@ def create_export_window(file_type, frame):
     create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
     
     # file name
-    create_text_widget(frame, 'label', 'Name the file', 10)
+    create_text_widget(frame, 'label', 'Name the file', 18)
     name = create_entry(frame)
     error_name = create_error_msg(frame)
     
     # activation button
-    create_button(frame, button_choice, 20, 20, lambda: export_data(frame, file_type, name, error_account, error_name))
+    create_button(frame, button_choice, 15, 15, lambda: export_data(frame, file_type, name, error_account, error_name))
 
 # menu
 def create_menu_window(frame):
@@ -911,6 +914,14 @@ def create_menu_window(frame):
     # help_menu.add_command(label='Export')
     
 # _________________________________ INITIATE APP _________________________________
+# check if files exist
+if not os.path.exists(finance_file):
+    with open(finance_file, 'w') as file:
+        file.write('date|account|symbol|amount|purpose')
+if not os.path.exists(account_file):
+    with open(account_file, 'a') as file:
+        pass
+# create app
 set_window(window, 600, 600, reposition=True)
 main_frame = tk.Frame(window, background=bg_common)
 main_frame.pack(fill='both', expand='True')
