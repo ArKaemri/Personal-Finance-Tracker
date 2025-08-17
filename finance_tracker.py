@@ -14,8 +14,8 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 window = tk.Tk(className='Expense tracker')
 
 # ------------ global variables
-account_file = 'account.txt'
-finance_file = 'finance.txt'
+account_file = 'accounts.txt'
+finance_file = 'finances.txt'
 
 screen_w = window.winfo_screenwidth()
 screen_h = window.winfo_screenheight()
@@ -39,11 +39,13 @@ fg_common = 'black' # common text (output, input, active button)
 fg_button = 'white' # text for passive buttons, labels, headers
 fg_error = '#ffb5b5' # error message text color
 
-font_header = tkfont.Font(family='DejaVu Sans', size=-36, weight='bold')
-font_label = tkfont.Font(family='DejaVu Sans', size=-22, weight='bold')
-font_text = tkfont.Font(family='DejaVu Sans', size=-16) # font for common text (table, text in graphs)
-font_entry = tkfont.Font(family='DejaVu Sans', size=-16, weight='bold')
-font_error = tkfont.Font(family='DejaVu Sans', size=-12, weight='bold')
+# for windows DejaVu Sans
+# for linux Helvetica
+font_header = tkfont.Font(family='Helvetica', size=-36, weight='bold')
+font_label = tkfont.Font(family='Helvetica', size=-22, weight='bold')
+font_text = tkfont.Font(family='Helvetica', size=-16) # font for common text (table, text in graphs)
+font_entry = tkfont.Font(family='Helvetica', size=-16, weight='bold')
+font_error = tkfont.Font(family='Helvetica', size=-12, weight='bold')
 
 # ------------ custom style configuration
 style = ttk.Style()
@@ -615,7 +617,7 @@ def plot_graph(error_account):
     # get values
     df = create_table()
     # create graph
-    fig = Figure(figsize=(9, 6))
+    fig = Figure(figsize=(11, 7))
     fig.set_facecolor(bg_common) # color of background (not graph itself)
     ax = fig.add_subplot(111)
     ax.set_facecolor(bg_text) # color of graph
@@ -652,7 +654,7 @@ def plot_graph(error_account):
     # if mouse is near the point, go through every scatter plot and find close points
     # when mouse is on the point get the location of row in any scatter point and display annotation
     ###
-    annot = ax.annotate('', xy=(0, 0), xytext=(20, 20), textcoords='offset points', # put empty text placeholder, xy - starting point (the hover), xytext - where the text is (20 points out)
+    annot = ax.annotate('', xy=(0, 0), xytext=(-10, 20), textcoords='offset points', # put empty text placeholder, xy - starting point (the hover), xytext - where the text is (20 points out)
                         bbox = dict(boxstyle='round', fc=bg_text, edgecolor=fg_common), # background of annotation
                         arrowprops = dict(arrowstyle='->')) # show which point is hovered by pointing ->
     annot.set_visible(False)
@@ -705,7 +707,7 @@ def plot_chart(error_account):
 ###
     if not check_selected_acc('display', error_account):
         return
-    reset_window(window, 740, 800)
+    reset_window(window, 740, 840)
     df = create_table()
     # label of what account chosen
     create_text_widget(main_frame, 'header', f'{selected_account.get()} earning/spending', header_pady=15)
@@ -725,7 +727,7 @@ def plot_chart(error_account):
     def create_chart(symbol):
         # purposes and their % from total 
         percent = df[df['symbol'] == symbol].groupby('purpose')['amount'].sum() # group all +/- rows by purpose and sum all amounts for each purpose
-        fig = Figure(figsize=(7, 3))
+        fig = Figure(figsize=(6, 2))
         fig.set_facecolor(bg_text)
         ax = fig.add_subplot(111)
         _, purposes, _ = ax.pie(percent, labels=percent.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})') # labels - index of purpose, autpct - percent \newline amount of slice
@@ -734,10 +736,12 @@ def plot_chart(error_account):
     # earning pie 
     frame_pos = custom_label(main_frame, f'Earnings (Total: {total_earning:.2f})', '#31ffd2')
     # figure
+    frame_pos.pack(fill='y', expand=True)
     fig_pos, purposes_pos = create_chart('+')
     
     # spending pie
     frame_neg = custom_label(main_frame, f'Spendings (Total: -{total_spending:.2f})', '#ffa1a1')
+    frame_neg.pack(fill='y', expand=True)
     fig_neg, purposes_neg = create_chart('-')
     
     # color labels white
@@ -749,8 +753,8 @@ def plot_chart(error_account):
     # build widgets
     canvas_poc = FigureCanvasTkAgg(fig_pos, master=frame_pos)
     canvas_neg = FigureCanvasTkAgg(fig_neg, master=frame_neg)
-    canvas_poc.get_tk_widget().pack()
-    canvas_neg.get_tk_widget().pack()
+    canvas_poc.get_tk_widget().pack(fill='both', expand=True)
+    canvas_neg.get_tk_widget().pack(fill='both', expand=True)
 
 # _________________________________ WINDOW UI _________________________________
 # entry UI
