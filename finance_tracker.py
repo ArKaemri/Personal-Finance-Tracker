@@ -723,6 +723,7 @@ def plot_chart(error_account):
         label = ttk.Label(frame, text=text, style='chart.TLabel', foreground=color)
         label.pack(fill='x')
         return frame
+    
     # figure
     def create_chart(symbol):
         # purposes and their % from total 
@@ -735,8 +736,8 @@ def plot_chart(error_account):
     
     # earning pie 
     frame_pos = custom_label(main_frame, f'Earnings (Total: {total_earning:.2f})', '#31ffd2')
-    # figure
     frame_pos.pack(fill='y', expand=True)
+    # figure
     fig_pos, purposes_pos = create_chart('+')
     
     # spending pie
