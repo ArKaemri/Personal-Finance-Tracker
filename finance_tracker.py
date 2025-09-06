@@ -175,8 +175,10 @@ def create_button(frame, text, button_pady, spacer_pady, command, text_var=None,
 # creat top level (popup)
 def create_toplevel(frame, w, h):
     toplevel = tk.Toplevel(frame)
+    toplevel.withdraw()
     toplevel.configure(background=bg_common)
     set_window(toplevel, w, h, parent=window, reposition=True)
+    toplevel.deiconify()
     toplevel.grab_set()
     return toplevel
 
