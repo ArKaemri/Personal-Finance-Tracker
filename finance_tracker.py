@@ -108,12 +108,21 @@ window.bind('<Escape>', lambda event: close_window(event))
 
 # ------------ window control
 # set window size/position
-def set_window(frame, w, h, reposition=False):
+def set_window(frame, w, h, parent=None, reposition=False):
     # get bottom left coordinates
     x = (screen_w / 2) - (w / 2)
     y = (screen_h / 3) - (h / 3)
     # position window
-    if reposition is True: # reposition = True, position in the middle of the screen/parent widget
+    if reposition is True and parent is not None: # reposition = True, position in the middle of the screen/parent widget
+        parent.update_idletasks()
+        px = parent.winfo_x()
+        py = parent.winfo_y()
+        pw = parent.winfo_width()
+        ph = parent.winfo_height()
+        x = px + (pw / 2) - (w / 2)
+        y = py + (ph / 2) - (h / 2)
+        frame.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    elif reposition is True:
         frame.geometry('%dx%d+%d+%d' % (w, h, x, y))
     else:
         frame.geometry('%dx%d' % (w, h))
@@ -167,7 +176,7 @@ def create_button(frame, text, button_pady, spacer_pady, command, text_var=None,
 def create_toplevel(frame, w, h):
     toplevel = tk.Toplevel(frame)
     toplevel.configure(background=bg_common)
-    set_window(toplevel, w, h, reposition=True)
+    set_window(toplevel, w, h, parent=window, reposition=True)
     toplevel.grab_set()
     return toplevel
 
