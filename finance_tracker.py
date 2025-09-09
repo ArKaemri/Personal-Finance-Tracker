@@ -476,11 +476,8 @@ def add_new_account():
                     error_msg.config(text='Such account already exist', background=bg_button)
                     return
         # write to file if not duplicate
-        with open(account_file, 'r+') as file:
-            if not file.read().strip():
-                file.write(account + '-live')
-            else:
-                file.write('\n' + account + '-live')
+        with open(account_file, 'a') as file:
+            file.write(account + '-live' + '\n')
         toplevel.destroy()
         
     create_button(toplevel, 'Confirm', 15, 0, new_account)
@@ -530,7 +527,7 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     # write into file
     output = f'{date}|{account}|{state}|{amount_val:.2f}|{text}' # 2025-07-11|bank|-|234.00|bought new tv
     with open(finance_file, 'a') as file:
-        file.write('\n' + output)
+        file.write(output + '\n')
     selected_account.set('Select Account')
     reset_window(window)
     create_entry_window(frame)
@@ -933,7 +930,7 @@ def create_menu_window(frame):
 # check if files exist
 if not os.path.exists(finance_file):
     with open(finance_file, 'w') as file:
-        file.write('date|account|symbol|amount|purpose')
+        file.write('date|account|symbol|amount|purpose' + '\n')
 if not os.path.exists(account_file):
     with open(account_file, 'a') as file:
         pass
