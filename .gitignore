@@ -1,3 +1,6 @@
 .venv
 accounts.txt
 finances.txt
+finance_tracker.exe
+finance_tracker.AppDir
+Finance_Tracker-x86_64.AppImage
