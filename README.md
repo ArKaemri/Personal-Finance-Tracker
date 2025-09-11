@@ -28,7 +28,7 @@ Same steps as for Windows, but different commands in the terminal:
 - source .venv/bin/activate
 - pip install -r requirements.txt
 - Launch from running in code editor or type 'python3 finance_tracker.py'
-P.S. - Linux (atleast Mint) don't have python packages that launch tkinter by default, so you need to install them manually, it will be installed on main system, not virtual environment.
+- P.S. - Linux (atleast Mint) don't have python packages that launch tkinter by default, so you need to install them manually, it will be installed on main system, not virtual environment.
 # Structure introduction
 ## Files
 - accounts.txt - keeps the list of all accounts
