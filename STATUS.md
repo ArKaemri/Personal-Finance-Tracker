@@ -4,7 +4,7 @@
 ### Planned development - Full return after urgent projects
 # Last 'frozen' update
 ### Date - 2025-09-11 
-### Exe & AppImage version - 
+### Stable release version - 
 # Future plans
 ### Current main issues
 - Non rensponsive design
