@@ -736,28 +736,29 @@ def plot_chart(error_account):
     def create_chart(symbol):
         # purposes and their % from total 
         percent = df[df['symbol'] == symbol].groupby('purpose')['amount'].sum() # group all +/- rows by purpose and sum all amounts for each purpose
+        labels = [f'{purposes}\n({value:.2f})' for purposes, value in zip(percent.index, percent * total_earning / 100)] # group purpose text and total value of slice
         fig = Figure(figsize=(6, 2))
         fig.set_facecolor(bg_text)
         ax = fig.add_subplot(111)
-        _, purposes, _ = ax.pie(percent, labels=percent.index, autopct=lambda pct: f'{pct:.1f}%\n({pct * total_earning / 100:.2f})') # labels - index of purpose, autpct - percent \newline amount of slice
-        return fig, purposes
+        _, label, autotext = ax.pie(percent, labels=labels, autopct='%1.2f%%', labeldistance=1.2)
+        return fig, label, autotext
     
     # earning pie 
     frame_pos = custom_label(main_frame, f'Earnings (Total: {total_earning:.2f})', '#31ffd2')
     frame_pos.pack(fill='y', expand=True)
     # figure
-    fig_pos, purposes_pos = create_chart('+')
+    fig_pos, purposes_pos, autotext_pos = create_chart('+')
     
     # spending pie
     frame_neg = custom_label(main_frame, f'Spendings (Total: -{total_spending:.2f})', '#ffa1a1')
     frame_neg.pack(fill='y', expand=True)
-    fig_neg, purposes_neg = create_chart('-')
+    fig_neg, purposes_neg, autotext_neg = create_chart('-')
     
-    # color labels white
-    for p in purposes_pos:
-        p.set_color(fg_common)
-    for p in purposes_neg:
-        p.set_color(fg_common)
+    # bold %
+    for a in autotext_pos:
+        a.set_fontweight('bold')
+    for a in autotext_neg:
+        a.set_fontweight('bold')
         
     # build widgets
     canvas_poc = FigureCanvasTkAgg(fig_pos, master=frame_pos)
