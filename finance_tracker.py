@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import tkinter.font as tkfont
+from tkcalendar import Calendar
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -27,8 +28,11 @@ selected_account_label = tk.StringVar() # show item selection for multiselect bu
 selected_account_label.set('Select Accounts')
 trunc_acc = tk.StringVar()
 
-selected_date = tk.StringVar() # selected time (1/3/6/9/12 months or all time)
-selected_date.set('all time')
+selected_time = tk.StringVar() # selected time (1/3/6/9/12 months or all time)
+selected_time.set('all time')
+
+selected_date = tk.StringVar() # input date for new entry
+selected_date.set(None)
 
 bg_common = "#aaaaaa" # common background
 bg_text = "#d4d4d4" # background for text (input fields or selection)
@@ -46,6 +50,25 @@ font_label = tkfont.Font(family='Helvetica', size=-22, weight='bold')
 font_text = tkfont.Font(family='Helvetica', size=-16) # font for common text (table, text in graphs)
 font_entry = tkfont.Font(family='Helvetica', size=-16, weight='bold')
 font_error = tkfont.Font(family='Helvetica', size=-12, weight='bold')
+
+# calendar icon
+calendar_hash = """
+iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAACXBIWXMAAAsSAAALEgHS3X78AAAC
+q0lEQVQ4T5VUS6hSURS9/v/fpybxxESUR1MHzRUHKihIA5u8gaHkSGgQ1Eh4CA0isaIGEZJBGUUN
+GtQoaNKHmgQPc/IoCiJEi/AV/k9rX++9Xe1FduBw3fvsvdba69wrxwmrXC471Wo1QyhtjUbzRjxf
+66nX618qFIqOSqV6HQ6H/WJTNBrdxNlHnLF4PG5dBcPZ/T8IvF7vVVKDpuFB7BaL5YlSqSS1XL1e
+17daLb1Qx5rNpnKphwp1Ot03KFsCMxqNj0GUoGKqMZvNKRDOBRsoTQQRetJ5LpfT8kn4ZahUKjqR
+xWAwvALQjhhbrda7IHsL0usiGI2P/DHRY/j9TGSQ1Lrd7hD8eCqXHwgEqmj+ApLTgiUMNc/llwXg
+fR4smUy65M1Op/OMPIaiPSi7hdt9QYpWN2HY7fY5h8J38Oe9vNnj8RwX41gstkHFkUiEngcuEE0g
+gHHValVFTEC+t1qZzWY3yFyM9yCfz5t9Pt9Fv9/vobpQKHRJrCcwh8PB3zgHdgs10bbZbDeCweBZ
+eLJLiqD6IdVkMplDQnyUYgAsmhe/f4Oh4UM6nbYA/SR82QPod6h5hNG8fxtNnpfGpKRWq/2Ex1gs
+gI8narWaEuqs2NuFQsGcSCR0qMvBDv5rMJlM23JlyDPpDQa6RDYajW632231cDg8jH2z3++Tavt4
+PL6Ds00qpLxcHaZZhKQM40kerDPa6ph0AaKyJSCAs1KppMW4W9isWCweSaVSHiLEy7nVaDQU8Hmp
+hzHG8WDT6XQfr4dEhnE6s9mMYSRaHTSOXS7XfDKZdOZY1Eg1cnVI/+RjAO0K/2X/OyFfj94ZLuqz
+mgJ8j9e63e4VjEHf14SY11nCNBooVuJ2z0uz4WpPIXkOfzVOsJj+BQZCsuHHYDD4Chsu9Hq9y78A
+i+P16JcUynwAAAAASUVORK5CYII=
+"""
+calendar_icon = tk.PhotoImage(data=calendar_hash)
 
 # ------------ custom style configuration
 style = ttk.Style()
@@ -220,7 +243,7 @@ def create_table():
     
     # filter by time
     def filter_time(df):
-        date = selected_date.get()
+        date = selected_time.get()
         # calculate date (n month from the date of last input (not from current day)) + 00.00.00 time 
         max_date = df['date'].max().normalize()
     
@@ -248,17 +271,17 @@ def create_table():
     df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1).apply(lambda x: round(x, 2)) # if symbol '+' -> +number, else -> -number, then format 00.00
     df['current_amount'] = df.groupby('account')['signed_amount'].cumsum().apply(lambda x: round(x, 2)) # group by account, add 'signed_amount' for each new line, format as 00.00
     # get account list for filter
-    if selected_account.get() == 'all' and selected_date.get() == 'all time':
+    if selected_account.get() == 'all' and selected_time.get() == 'all time':
         df = df.copy()
         df['date'] = df['date'].dt.date # take away 00.00.00 from dates
         return df
-    elif selected_account.get() != 'all' and selected_date.get() == 'all time':
+    elif selected_account.get() != 'all' and selected_time.get() == 'all time':
         # filter by accounts
         filtered_df = filter_account(df)
         filtered_df = filtered_df.copy()
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df       
-    elif selected_account.get() == 'all' and selected_date.get() != 'all time':
+    elif selected_account.get() == 'all' and selected_time.get() != 'all time':
         # filter by date
         filtered_df = filter_time(df)
         filtered_df = filtered_df.copy()
@@ -450,6 +473,21 @@ def choose_time(label_var):
     time_var = tk.Variable(value=tuple(values))
     listbox = create_listbox(toplevel, time_var, 'single', lambda event: select_single_item(event, label_var))
 
+# select date for new entry
+def choose_date():
+###
+# create popup with calendar, choose the date with mouse click
+# once selected, popup closes and selected date replaces today's date
+###
+    toplevel = create_toplevel(main_frame, 400, 280)
+    create_text_widget(toplevel, 'label', 'Selected entry date', label_pady=20)
+    calendar = Calendar(toplevel, selectmode='day', date_pattern='yyyy-mm-dd')
+    calendar.pack()
+    def show(e):
+        selected_date.set(calendar.get_date())
+        toplevel.destroy()
+    calendar.bind('<<CalendarSelected>>', show)
+
 # ------------ create new data 
 # add new account
 def add_new_account():
@@ -493,7 +531,6 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     # get selections
     account = selected_account.get()
     text = text.get().lower()
-    date = datetime.datetime.now().strftime('%Y-%m-%d') # format as YYYY-MM-DD
     # get amount in text form without spaces -> '- 20', '-20', ' - 20' becomes '-20'
     amount_text = amount.get().strip()
     
@@ -523,6 +560,12 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     else:
         state = '+'
     amount_val = float(amount_text)
+    
+    # check if date is selected
+    if selected_date.get() == 'None':
+        date = datetime.datetime.now().strftime('%Y-%m-%d') # format as YYYY-MM-DD
+    else:
+        date = selected_date.get()
     
     # write into file
     output = f'{date}|{account}|{state}|{amount_val:.2f}|{text}' # 2025-07-11|bank|-|234.00|bought new tv
@@ -564,7 +607,7 @@ def export_data(frame, type, name, error_account, error_name):
         
     selected_account_label.set('Select Accounts')
     selected_account.set('Select Account')
-    selected_date.set('all time')
+    selected_time.set('all time')
     reset_window(window)
     create_export_window(type, frame)
 
@@ -620,7 +663,7 @@ def plot_graph(error_account):
     if not check_selected_acc('display', error_account):
         return
     reset_window(window, 900, 760)
-    create_text_widget(main_frame, 'header', f'{selected_date.get()} history')
+    create_text_widget(main_frame, 'header', f'{selected_time.get()} history')
     
     # get values
     df = create_table()
@@ -770,24 +813,31 @@ def plot_chart(error_account):
 # entry UI
 def create_entry_window(frame):
     reset_window(window)
+
+    # reset date selection on refresh
+    if selected_date != 'None':
+        selected_date.set(None)
+
     if not check_selected_acc('entry'):
         return
 
     # header
     create_text_widget(frame, 'header', 'New Entry')
-    
+
     # account choice
     create_text_widget(frame, 'label', 'Choose account')
     button_frame = ttk.Frame(frame) # to position account buttons in row
     button_frame.pack(pady=5)
     error_account = create_error_msg(frame)
-    
-    # buttons for account action (custom)
+
+    # buttons for account action and date (custom)
+    date = ttk.Button(button_frame, image=calendar_icon, command=choose_date, width=4, compound='center')
+    date.pack(side=tk.LEFT, padx=0, pady=0)
     account = ttk.Button(button_frame, textvariable=selected_account, command=lambda: load_account_single(selected_account, error_account), width=15) # left button
     account.pack(side=tk.LEFT, padx=0, pady=0)
     add_account = ttk.Button(button_frame, text='+', command=add_new_account, width=4) # right button
     add_account.pack(side=tk.LEFT, padx=0, pady=0)
-    
+
     # amount field
     create_text_widget(frame, 'label', 'Input amount', 10)
     amount = create_entry(frame)
@@ -816,7 +866,7 @@ def create_overview_window(frame):
 
     # date
     create_text_widget(frame, 'label', 'Choose time period', 30)
-    create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
+    create_button(frame, None, 0, 0, lambda: choose_time(selected_time), selected_time)
     
     # button to activate
     create_button(frame, 'Show', 20, 44, lambda: display_table(error_account))
@@ -837,7 +887,7 @@ def create_history_window(frame):
     
     # date choice
     create_text_widget(frame, 'label', 'Choose time period', 30)
-    create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
+    create_button(frame, None, 0, 0, lambda: choose_time(selected_time), selected_time)
     
     # button to activate
     create_button(frame, 'Plot', 20, 44, lambda: plot_graph(error_account))
@@ -858,7 +908,7 @@ def create_chart_window(frame):
     
     # date choice
     create_text_widget(frame, 'label', 'Choose time period', 30)
-    create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
+    create_button(frame, None, 0, 0, lambda: choose_time(selected_time), selected_time)
     
     # button to activate
     create_button(frame, 'Plot', 20, 44, lambda: plot_chart(error_account))
@@ -887,7 +937,7 @@ def create_export_window(file_type, frame):
     
     # date choice
     create_text_widget(frame, 'label', 'Choose time period', 10)
-    create_button(frame, None, 0, 0, lambda: choose_time(selected_date), selected_date)
+    create_button(frame, None, 0, 0, lambda: choose_time(selected_time), selected_time)
     
     # file name
     create_text_widget(frame, 'label', 'Name the file', 18)
