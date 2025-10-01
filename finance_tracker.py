@@ -70,6 +70,9 @@ i+P16JcUynwAAAAASUVORK5CYII=
 """
 calendar_icon = tk.PhotoImage(data=calendar_hash)
 
+# list of purpose suggestions
+purpose_list = []
+
 # ------------ custom style configuration
 style = ttk.Style()
 style.theme_use('default')
@@ -294,6 +297,22 @@ def create_table():
         filtered_df['date'] = filtered_df['date'].dt.date
         return filtered_df
 
+# finance purpose list
+def make_purpose_list():
+###
+# read the finance.txt file and extract last column of all rows
+# save the values into list to auto-suggest purpose in entry window
+###
+    all_purposes = []
+    with open(finance_file, 'r') as file:
+        for line in file:
+            # get the 5-th value (5-th column = purpose)
+            purpose = [p for p in line.strip().split('|')][4]
+            all_purposes.append(purpose)
+    # get unique values and convert back to list
+    purpose_list = list(set(all_purposes))
+    return purpose_list
+
 # ------------ listbox function
 # select single item
 def select_single_item(event, label_var, error_msg=None):
@@ -316,6 +335,10 @@ def select_single_item(event, label_var, error_msg=None):
     if error_msg:
         error_msg.config(text='', background=bg_common)
     listbox.master.destroy()
+
+# select purpose
+def select_purpose():
+    return
 
 # ------------ fail checks
 # check if selected account is valid for window 
@@ -574,6 +597,14 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     selected_account.set('Select Account')
     reset_window(window)
     create_entry_window(frame)
+    if text not in purpose_list: # LATER
+        purpose_list.append(text) # LATER
+    print(purpose_list)  # LATER
+
+# show purpose suggestion
+# def show_suggestion(frame):
+#     listbox = create_listbox(frame, purpose_list, 'single', select_purpose)
+#     return
 
 # export data 
 def export_data(frame, type, name, error_account, error_name):
@@ -776,10 +807,10 @@ def plot_chart(error_account):
         return frame
     
     # figure
-    def create_chart(symbol):
+    def create_chart(symbol, total_value):
         # purposes and their % from total 
         percent = df[df['symbol'] == symbol].groupby('purpose')['amount'].sum() # group all +/- rows by purpose and sum all amounts for each purpose
-        labels = [f'{purposes}\n({value:.2f})' for purposes, value in zip(percent.index, percent * total_earning / 100)] # group purpose text and total value of slice
+        labels = [f'{purposes}\n({value:.2f})' for purposes, value in zip(percent.index, percent)] # group purpose text and total value of slice
         fig = Figure(figsize=(6, 2))
         fig.set_facecolor(bg_text)
         ax = fig.add_subplot(111)
@@ -790,12 +821,12 @@ def plot_chart(error_account):
     frame_pos = custom_label(main_frame, f'Earnings (Total: {total_earning:.2f})', '#31ffd2')
     frame_pos.pack(fill='y', expand=True)
     # figure
-    fig_pos, purposes_pos, autotext_pos = create_chart('+')
+    fig_pos, _, autotext_pos = create_chart('+', total_earning)
     
     # spending pie
     frame_neg = custom_label(main_frame, f'Spendings (Total: -{total_spending:.2f})', '#ffa1a1')
     frame_neg.pack(fill='y', expand=True)
-    fig_neg, purposes_neg, autotext_neg = create_chart('-')
+    fig_neg, _, autotext_neg = create_chart('-', total_spending)
     
     # bold %
     for a in autotext_pos:
@@ -846,6 +877,7 @@ def create_entry_window(frame):
     # purpose (text field)
     create_text_widget(frame, 'label', 'Gain source / Spent destination', 10)
     text = create_entry(frame)
+    # show_suggestion(frame)
     error_text = create_error_msg(frame)
 
     # activation button
@@ -985,6 +1017,11 @@ if not os.path.exists(finance_file):
 if not os.path.exists(account_file):
     with open(account_file, 'a') as file:
         pass
+
+# create purpose suggestion list
+if os.path.exists(finance_file):
+    purpose_list = make_purpose_list()
+
 # create app
 set_window(window, 600, 600, reposition=True)
 main_frame = tk.Frame(window, background=bg_common)
