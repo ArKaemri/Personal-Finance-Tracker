@@ -4,7 +4,8 @@ This is minimal and simplistic finance tracking app, not equal to big apps with 
 - App uses 2 .txt files that are created automatically, when relocating app, relocate .txt aswell 
 - Design is static, making it smaller/bigger may not look pretty
 - App functionality: input new data, see table of all data, see history of change, spending/earning charts, export to csv/excel
-- Input reason (last field in entry tab) is static, reasons 'bought groceries' and 'groceries' or even 'Bought groceries' are treated as different reasons
+- Input reason (last field in entry tab) is static, reasons 'bought groceries' and 'groceries' or even 'Bought groceries' are treated as different reasons (when writing purpose the suggestion of all your previously input purposes will show, so click on it if same reason as before, otherwise just input new one)
+- If new entry is completed with account + value + purpose, date of input will be used, for different date (for example input on may 29, but the transaction happened at may 28) click on calendar icon on the left of 'Select Account' and select date from calendar widget
 - Navigate through functionality by top bar (menu)
 - Works offline
 # Use manual
