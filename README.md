@@ -36,6 +36,7 @@ Same steps as for Windows, but different commands in the terminal:
 - finances.txt - keep records of spendings/earnings
 ## Entry 
 Used to input new accounts or data records into .txt files:
+- calendar icon (left from 'select account') select custom date for new entry
 - 'select account' let's choose from already created accounts
 - '+' inputs new account
 - 'input ammount' field - inputs money amount (- for spending, nothing for earning)
