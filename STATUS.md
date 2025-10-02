@@ -2,9 +2,9 @@
 ### Working status - On Hold
 ### Priority - Medium
 ### Planned development - Full return after urgent projects
-# Last 'frozen' update
-### Date - 2025-09-11 
-### Stable release version - 
+# Last 'stable' update
+### Date - 2025-10-03
+### Release version - 1.0.0
 # Future plans
 ### Current main issues
 - Non rensponsive design
