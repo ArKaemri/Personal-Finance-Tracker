@@ -336,10 +336,6 @@ def select_single_item(event, label_var, error_msg=None):
         error_msg.config(text='', background=bg_common)
     listbox.master.destroy()
 
-# select purpose
-def select_purpose():
-    return
-
 # ------------ fail checks
 # check if selected account is valid for window 
 def check_selected_acc(window, error_msg=None):
@@ -597,14 +593,59 @@ def save_entry(amount, text, error_amount, error_text, error_account, frame):
     selected_account.set('Select Account')
     reset_window(window)
     create_entry_window(frame)
-    if text not in purpose_list: # LATER
-        purpose_list.append(text) # LATER
-    print(purpose_list)  # LATER
+    
+    # extende purpose list if new purpose input
+    if text not in purpose_list:
+        purpose_list.append(text)
 
 # show purpose suggestion
-# def show_suggestion(frame):
-#     listbox = create_listbox(frame, purpose_list, 'single', select_purpose)
-#     return
+def show_suggestion(frame, text):
+###
+# show list of all existing 'purpose' from the txt file
+# clicking on suggestion inputs it into the entry field
+# list auto-updates after each letter and checks for any match
+###
+    def hide(e):
+        listbox.place_forget()
+    
+    # update showed values in listbox    
+    def update_listbox(e):
+        search = text.get().strip().lower()
+        # check for entry match to all saved purpose list
+        matches = [v for v in purpose_list if search in v.lower()] if search else []
+        # if match found and on entry field
+        if matches and text.focus_get() == text:
+            # empty out the list
+            listbox.delete(0, tk.END)
+            for m in matches:
+                # if match found insert to list
+                listbox.insert(tk.END, m)
+            # config height to how many suggestions found
+            listbox.configure(height=len(matches))
+            # place below entry and on top of other widgets
+            x, y, w, h = text.winfo_x(), text.winfo_y(), text.winfo_width(), text.winfo_height()
+            listbox.place(x=x, y=y+h, width=w)
+            listbox.lift()
+        else:
+            listbox.place_forget()
+        
+    # replace entry input with suggestion
+    def fill_entry(e):
+        if listbox.curselection():
+            selected = listbox.get(listbox.curselection()[0])
+            text.delete(0, tk.END)
+            text.insert(0, selected)
+            listbox.place_forget()
+    
+    # create listbox and put directly below entry
+    listbox = tk.Listbox(frame)
+    listbox.configure(background=bg_text, foreground=fg_common, font=font_text)
+    listbox.place_forget()
+    
+    # update list suggestions, hide when when not in focus, replace entry
+    text.bind('<KeyRelease>', update_listbox)
+    text.bind('<FocusOut>', hide)
+    listbox.bind('<<ListboxSelect>>', fill_entry)
 
 # export data 
 def export_data(frame, type, name, error_account, error_name):
@@ -877,7 +918,7 @@ def create_entry_window(frame):
     # purpose (text field)
     create_text_widget(frame, 'label', 'Gain source / Spent destination', 10)
     text = create_entry(frame)
-    # show_suggestion(frame)
+    show_suggestion(frame, text)
     error_text = create_error_msg(frame)
 
     # activation button
