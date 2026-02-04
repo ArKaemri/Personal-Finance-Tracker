@@ -269,6 +269,7 @@ def create_table():
     # create dataframe
     df = pd.read_csv(finance_file, sep='|')
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d') # transform text to pd date
+    df.sort_values(by='date', inplace=True)
     
     # add column for current amount (how much money in total at specific date) -> day1 = 23.00, day2 = 10.00 -> day1_sum = 23.00, day2_sum = 33.00
     df['signed_amount'] = df.apply(lambda row: row['amount'] if row['symbol'] == '+' else -row['amount'], axis=1).apply(lambda x: round(x, 2)) # if symbol '+' -> +number, else -> -number, then format 00.00
