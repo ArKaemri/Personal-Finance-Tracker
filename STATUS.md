@@ -2,7 +2,7 @@
 ### Working status - On Hold
 ### Priority - Medium
 ### Planned development - Full return after urgent projects
-# Last 'stable' update
+# Last version update (X.0.0)
 ### Date - 2025-10-03
 ### Release version - 1.0.0
 # Future plans
@@ -18,7 +18,7 @@
 - Option to delet account/finance from GUI
 - Add custom classes for accounts (show in groups instead of full single list)
 - Add scrollbars
-- Add choice to select date with calendar widget (both in input and finance showcase tabs)
+- Add choice to select date with calendar widget
 - Show existing finance reasons for account (autocomplete reason by account type)
 - Add light/dark modes
 - Add RU and LT languages
