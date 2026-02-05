@@ -43,13 +43,14 @@ fg_common = 'black' # common text (output, input, active button)
 fg_button = 'white' # text for passive buttons, labels, headers
 fg_error = '#ffb5b5' # error message text color
 
-# for windows DejaVu Sans
-# for linux Helvetica
-font_header = tkfont.Font(family='Helvetica', size=-36, weight='bold')
-font_label = tkfont.Font(family='Helvetica', size=-22, weight='bold')
-font_text = tkfont.Font(family='Helvetica', size=-16) # font for common text (table, text in graphs)
-font_entry = tkfont.Font(family='Helvetica', size=-16, weight='bold')
-font_error = tkfont.Font(family='Helvetica', size=-12, weight='bold')
+# fonts
+font = 'DejaVu Sans'
+
+font_header = tkfont.Font(family=font, size=-34, weight='bold')
+font_label = tkfont.Font(family=font, size=-20, weight='bold')
+font_text = tkfont.Font(family=font, size=-14) # font for common text (table, text in graphs)
+font_entry = tkfont.Font(family=font, size=-14, weight='bold')
+font_error = tkfont.Font(family=font, size=-10, weight='bold')
 
 # calendar icon
 calendar_hash = """
@@ -103,7 +104,7 @@ style.configure('TButton', # button when passive (just displayed)
                 background = bg_button,
                 foreground = fg_button,
                 font = font_entry,
-                padding = (4, 8))
+                padding = 8)
 style.map('TButton', # button when pressed
           background = [('active', bg_text)],
           foreground = [('active', fg_common)])
