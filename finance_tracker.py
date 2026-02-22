@@ -714,7 +714,7 @@ def display_table(error_account):
     df = create_table()
     grouped_df = df.groupby('account')
     for account, group in grouped_df:
-        total = group['amount'].sum()
+        total = group['current_amount'].iloc[-1]
         # input parent (account name) and total
         parent_id = tree.insert('', tk.END, text=f'{account} (Total: {total:.2f})', tag='account_row')
         # go through all rows based on account
